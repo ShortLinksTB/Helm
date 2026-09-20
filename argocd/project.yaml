@@ -7,6 +7,9 @@ spec:
   description: ShortLink workspace — dev and sandbox environments
   sourceRepos:
     - git@github.com:ShortLinksTB/Helm.git
+    # Wildcard so each future ShortLinksTB service repo's dev Application (see
+    # argocd/README.md convention) is allowed as a sync source without a per-service edit here.
+    - git@github.com:ShortLinksTB/*
   destinations:
     - namespace: shortlink-dev
       server: https://kubernetes.default.svc
