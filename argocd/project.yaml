@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: shortlink
+  namespace: argocd
+spec:
+  description: ShortLink workspace — dev and sandbox environments
+  sourceRepos:
+    - git@github.com:ShortLinksTB/Helm.git
+  destinations:
+    - namespace: shortlink-dev
+      server: https://kubernetes.default.svc
+    - namespace: shortlink-sandbox
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

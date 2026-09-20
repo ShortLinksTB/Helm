@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shortlink-sandbox
+  namespace: argocd
+spec:
+  project: shortlink
+  source:
+    repoURL: git@github.com:ShortLinksTB/Helm.git
+    targetRevision: main
+    path: argocd/apps/sandbox
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shortlink-sandbox
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
