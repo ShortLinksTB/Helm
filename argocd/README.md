@@ -3,21 +3,20 @@
 This directory is the GitOps root for the ShortLink homelab cluster.
 
 - `project.yaml` — the `shortlink` AppProject: restricts sync to this repo (plus any
-  `ShortLinksTB/*` service repo, see below) and to the `shortlink-dev` / `shortlink-sandbox`
-  namespaces on the in-cluster API server.
-- `bootstrap/` — the two root Applications (`shortlink-dev`, `shortlink-sandbox`), applied
-  once manually to the cluster (`kubectl apply -n argocd -f argocd/bootstrap/`). They are the
-  only manifests ArgoCD does not manage via GitOps itself (chicken-and-egg bootstrap step).
-- `apps/dev/`, `apps/sandbox/` — each root Application watches its matching directory here
-  (recursively). To deploy a new service to an environment, add its Helm `Application`
-  manifest (pointing at that service's chart/values) as a file under the matching directory
-  and push to `main`; the root Application picks it up automatically (automated sync +
-  self-heal + prune are enabled).
+  `ShortLinksTB/*` service repo, see below) and to the `shortlink-dev` namespace on the
+  in-cluster API server.
+- `bootstrap/` — the root Application (`shortlink-dev`), applied once manually to the
+  cluster (`kubectl apply -n argocd -f argocd/bootstrap/`). It is the only manifest ArgoCD
+  does not manage via GitOps itself (chicken-and-egg bootstrap step).
+- `apps/dev/` — the root Application watches this directory (recursively). To deploy a new
+  service to dev, add its Helm `Application` manifest (pointing at that service's chart/values)
+  as a file under this directory and push to `main`; the root Application picks it up
+  automatically (automated sync + self-heal + prune are enabled).
 - `templates/service-application.example.yaml` — copy-and-fill template for a new service's
   dev Application (see convention below).
 
-Both root Applications target namespace `shortlink-dev` / `shortlink-sandbox` respectively
-and create them on first sync (`CreateNamespace=true`).
+The root Application targets namespace `shortlink-dev` and creates it on first sync
+(`CreateNamespace=true`).
 
 ## Branch convention for service Applications
 
@@ -35,7 +34,6 @@ workspace — follow it directly for the first service without asking again.
   `Application`, App-of-Apps entry, or `argocd/apps/prd/` directory pointing at `main` until
   prd is explicitly scoped in a separate `[Promote][prd]` issue. When a service repo is
   created, only add its dev Application under `apps/dev/`.
-- **`sandbox`** — unchanged from the SL-1 bootstrap; not part of this convention change.
 
 ### Adding the first service
 

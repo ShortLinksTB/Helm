@@ -4,7 +4,7 @@ metadata:
   name: shortlink
   namespace: argocd
 spec:
-  description: ShortLink workspace — dev and sandbox environments
+  description: ShortLink workspace — dev environment
   sourceRepos:
     - git@github.com:ShortLinksTB/Helm.git
     # Wildcard so each future ShortLinksTB service repo's dev Application (see
@@ -12,8 +12,6 @@ spec:
     - git@github.com:ShortLinksTB/*
   destinations:
     - namespace: shortlink-dev
-      server: https://kubernetes.default.svc
-    - namespace: shortlink-sandbox
       server: https://kubernetes.default.svc
     - namespace: argocd
       server: https://kubernetes.default.svc
