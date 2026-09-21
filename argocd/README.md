@@ -32,6 +32,16 @@ Both service sources follow the dev convention:
   not rename or replace `argocd-shortlink-dev.giamha.online`,
   `admin-shortlink-dev.giamha.online`, or `app-shortlink-dev.giamha.online`.
 
+## Permanent single-Application convention
+
+Every current and future dev service must be represented as one source/node inside the existing
+`ShortLink` Application. Never create a separate ArgoCD `Application` per service. To add a
+service, add its Helm chart/subchart or manifest source to `spec.sources` in
+`argocd/bootstrap/dev-root-app.yaml`, use `targetRevision: dev`, provide its dev values, and
+assign a unique Helm `releaseName` so its Kubernetes resources cannot collide with another
+source. Keep all service sources in this one Application and keep them in the `shortlink-dev`
+namespace; do not add a child Application under `argocd/apps/dev/`.
+
 ## Updating the Application
 
 Keep one `Application` manifest and add or remove service sources there only when the scope
