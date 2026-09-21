@@ -1,16 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: shortlink-dev
+  name: ShortLink
   namespace: argocd
 spec:
   project: shortlink
-  source:
-    repoURL: git@github.com:ShortLinksTB/Helm.git
-    targetRevision: main
-    path: argocd/apps/dev
-    directory:
-      recurse: true
+  sources:
+    - repoURL: git@github.com:ShortLinksTB/AdminUI.git
+      targetRevision: dev
+      path: charts/adminui
+      helm:
+        releaseName: adminui-dev
+        valueFiles:
+          - values-dev.yaml
+    - repoURL: git@github.com:ShortLinksTB/ShortLinkUI.git
+      targetRevision: dev
+      path: charts/shortlinkui
+      helm:
+        releaseName: shortlinkui-dev
+        valueFiles:
+          - values-dev.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: shortlink-dev
