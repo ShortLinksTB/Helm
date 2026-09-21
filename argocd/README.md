@@ -4,8 +4,9 @@ This directory is the GitOps root for the ShortLink homelab cluster.
 
 - `project.yaml` is the `shortlink` AppProject. It allows the service repositories and
   the `shortlink-dev` namespace on the in-cluster API server.
-- `bootstrap/dev-root-app.yaml` is the single `ShortLink` Application. Apply it once
-  manually with `kubectl apply -n argocd -f argocd/bootstrap/dev-root-app.yaml`.
+- `bootstrap/dev-root-app.yaml` is the single logical `ShortLink` Application. Its Kubernetes
+  resource name is `shortlink` because Application metadata names must be lowercase RFC-1123
+  identifiers. Apply it once manually with `kubectl apply -n argocd -f argocd/bootstrap/dev-root-app.yaml`.
 - `apps/dev/` intentionally contains no child Applications. AdminUI and ShortLinkUI are
   rendered as two sources, and therefore two resource subtrees, of `ShortLink`.
 
