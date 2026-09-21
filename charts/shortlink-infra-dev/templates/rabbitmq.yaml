@@ -59,17 +59,15 @@ spec:
                   name: {{ .Values.credentialsSecret }}
                   key: rabbitmq-password
           readinessProbe:
-            exec:
-              command: ["rabbitmq-diagnostics", "-q", "ping"]
+            tcpSocket:
+              port: amqp
             initialDelaySeconds: 15
             periodSeconds: 10
-            timeoutSeconds: 5
           livenessProbe:
-            exec:
-              command: ["rabbitmq-diagnostics", "-q", "ping"]
+            tcpSocket:
+              port: amqp
             initialDelaySeconds: 30
             periodSeconds: 20
-            timeoutSeconds: 5
           resources:
             {{- toYaml .Values.rabbitmq.resources | nindent 12 }}
           volumeMounts:
