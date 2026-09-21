@@ -1,7 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ShortLink
+  # ArgoCD displays this logical Application as ShortLink; Kubernetes metadata.name
+  # must be lowercase RFC-1123, so the resource name is shortlink.
+  name: shortlink
   namespace: argocd
 spec:
   project: shortlink
