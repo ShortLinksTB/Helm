@@ -13,6 +13,8 @@ spec:
   destinations:
     - namespace: shortlink-dev
       server: https://kubernetes.default.svc
+    - namespace: shortlink-infra-dev
+      server: https://kubernetes.default.svc
     - namespace: argocd
       server: https://kubernetes.default.svc
   clusterResourceWhitelist: []
