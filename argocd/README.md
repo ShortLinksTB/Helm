@@ -33,18 +33,19 @@ Both service sources follow the dev convention:
   not rename or replace `argocd-shortlink-dev.giamha.online`,
   `admin-shortlink-dev.giamha.online`, or `app-shortlink-dev.giamha.online`.
 
-## Permanent single-Application convention
+## Application convention
 
-Every current and future dev service must be represented as one source/node inside the existing
-`ShortLink` Application. Never create a separate ArgoCD `Application` per service. To add a
-service, add its Helm chart/subchart or manifest source to `spec.sources` in
-`argocd/bootstrap/dev-root-app.yaml`, use `targetRevision: dev`, provide its dev values, and
-assign a unique Helm `releaseName` so its Kubernetes resources cannot collide with another
-source. Keep all service sources in this one Application and keep them in the `shortlink-dev`
-namespace; do not add a child Application under `argocd/apps/dev/`.
+Stateless ShortLink workloads remain sources of the `shortlink` Application in the
+`shortlink-dev` namespace. Stateful shared dependencies are deliberately isolated in their own
+`shortlink-infra-dev` Application and `shortlink-infra-dev` namespace. This creates an
+independent Argo CD prune/self-heal boundary so a workload-source change cannot remove dependency
+PVCs.
+
+`shortlink-infra-dev` is defined at `argocd/apps/dev/shortlink-infra-dev.yaml` and renders the
+chart at `charts/shortlink-infra-dev` from this repository's `main` branch. It is ClusterIP-only;
+it must not be given an Ingress or public DNS entry.
 
 ## Updating the Application
 
-Keep one `Application` manifest and add or remove service sources there only when the scope
-explicitly changes. Every source must use a unique Helm `releaseName`; otherwise charts that
-use `.Release.Name` can collide on Kubernetes resource names.
+Keep workload sources in the existing Application, and keep stateful dependencies in the dedicated
+infrastructure Application. Every Helm source must use a unique release name.
