@@ -32,3 +32,57 @@ rabbitmq:
     limits:
       cpu: "1"
       memory: 1Gi
+
+minio:
+  image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+  storage: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+keycloak:
+  image: quay.io/keycloak/keycloak:26.2.5
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+sonarqube:
+  image: sonarqube:25.4.0.105899-community
+  storage: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+sonarqubePostgresql:
+  image: postgres:15.12-alpine
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+grafana:
+  image: grafana/grafana:11.6.0
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
