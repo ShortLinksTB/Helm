@@ -148,18 +148,22 @@ spec:
               port: http
             failureThreshold: 60
             periodSeconds: 10
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /api/system/status
               port: http
             initialDelaySeconds: 90
             periodSeconds: 15
+            timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /api/system/status
               port: http
             initialDelaySeconds: 120
             periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
           resources:
             {{- toYaml .Values.sonarqube.resources | nindent 12 }}
           volumeMounts:
