@@ -61,6 +61,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.credentialsSecret }}
                   key: mssql-sa-password
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: 9000
+            failureThreshold: 36
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /health/ready
