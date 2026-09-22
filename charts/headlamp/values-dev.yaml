@@ -1,0 +1,75 @@
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: headlamp-reader
+
+# The upstream chart defaults to cluster-admin. Headlamp must stay constrained
+# to its own namespace unless a future issue explicitly authorizes wider access.
+clusterRoleBinding:
+  create: false
+
+persistentVolumeClaim:
+  enabled: false
+
+ingress:
+  enabled: false
+
+config:
+  inCluster: true
+  inClusterContextName: shortlink-dev
+  enableHelm: false
+  unsafeUseServiceAccountToken: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 100
+  runAsGroup: 101
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+extraManifests:
+  - |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: headlamp-reader
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "pods/log", "services", "configmaps", "events"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["apps"]
+        resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["batch"]
+        resources: ["jobs", "cronjobs"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["networking.k8s.io"]
+        resources: ["ingresses"]
+        verbs: ["get", "list", "watch"]
+  - |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: headlamp-reader
+    subjects:
+      - kind: ServiceAccount
+        name: headlamp-reader
+        namespace: headlamp
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: headlamp-reader
