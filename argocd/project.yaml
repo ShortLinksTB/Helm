@@ -7,6 +7,7 @@ spec:
   description: ShortLink workspace — dev environment
   sourceRepos:
     - git@github.com:ShortLinksTB/Helm.git
+    - https://kubernetes-sigs.github.io/headlamp/
     # Wildcard so each future ShortLinksTB service repo's dev Application (see
     # argocd/README.md convention) is allowed as a sync source without a per-service edit here.
     - git@github.com:ShortLinksTB/*
@@ -16,6 +17,8 @@ spec:
     - namespace: shortlink-infra-dev
       server: https://kubernetes.default.svc
     - namespace: argocd
+      server: https://kubernetes.default.svc
+    - namespace: headlamp
       server: https://kubernetes.default.svc
   clusterResourceWhitelist: []
   namespaceResourceWhitelist:

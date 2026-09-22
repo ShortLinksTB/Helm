@@ -45,6 +45,11 @@ PVCs.
 chart at `charts/shortlink-infra-dev` from this repository's `main` branch. It is ClusterIP-only;
 it must not be given an Ingress or public DNS entry.
 
+`headlamp-dev` is defined at `argocd/apps/dev/headlamp.yaml`. It renders the official Headlamp
+chart into the dedicated `headlamp` namespace. Its ServiceAccount is deliberately bound only to a
+namespaced read-only Role; the chart's default `cluster-admin` ClusterRoleBinding is disabled.
+Cloudflare Tunnel routing is managed outside this manifest and targets the cluster-local Service.
+
 ## Updating the Application
 
 Keep workload sources in the existing Application, and keep stateful dependencies in the dedicated
