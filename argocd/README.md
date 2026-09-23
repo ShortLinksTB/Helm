@@ -46,9 +46,15 @@ chart at `charts/shortlink-infra-dev` from this repository's `main` branch. It i
 it must not be given an Ingress or public DNS entry.
 
 `headlamp-dev` is defined at `argocd/apps/dev/headlamp.yaml`. It renders the official Headlamp
-chart into the dedicated `headlamp` namespace. Its ServiceAccount is deliberately bound only to a
-namespaced read-only Role; the chart's default `cluster-admin` ClusterRoleBinding is disabled.
-Cloudflare Tunnel routing is managed outside this manifest and targets the cluster-local Service.
+chart into the dedicated `headlamp` namespace. Its ServiceAccount `headlamp-manager` is bound to a
+custom `headlamp-manager` ClusterRole (SL-32, owner-approved, gated behind SL-33/Cloudflare Access)
+granting scoped cluster-wide management — Nodes/PVs/storage classes read-only, full workload CRUD
+and scale everywhere — while explicitly excluding `secrets` and all `rbac.authorization.k8s.io`
+resources, so a leaked token cannot read secrets or edit RBAC. The chart's built-in `cluster-admin`
+ClusterRoleBinding stays disabled (`clusterRoleBinding.create: false`); do not re-enable it (see
+SL-34, the incident that reverted an earlier cluster-admin binding). Cloudflare Tunnel routing is
+managed outside this manifest and targets the cluster-local Service; the public hostname is gated
+by Cloudflare Access (SL-33) ahead of Headlamp's own token prompt.
 
 ## Updating the Application
 
