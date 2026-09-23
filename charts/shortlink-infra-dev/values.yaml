@@ -86,3 +86,17 @@ grafana:
     limits:
       cpu: 500m
       memory: 512Mi
+
+tempo:
+  image: grafana/tempo:2.6.1
+  mcImage: quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z
+  storage: 5Gi
+  bucket: tempo-traces
+  retention: 168h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
