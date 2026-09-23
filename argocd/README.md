@@ -46,14 +46,9 @@ chart at `charts/shortlink-infra-dev` from this repository's `main` branch. It i
 it must not be given an Ingress or public DNS entry.
 
 `headlamp-dev` is defined at `argocd/apps/dev/headlamp.yaml`. It renders the official Headlamp
-chart into the dedicated `headlamp` namespace. Its ServiceAccount `headlamp-admin` is bound to the
-built-in `cluster-admin` ClusterRole (SL-32, owner-approved, reverses the SL-17 least-privilege
-decision) so Headlamp works as a full cluster management UI. Because Headlamp is publicly exposed
-via Cloudflare Tunnel and its bearer token now equals full cluster control, only mint short-lived
-tokens (`kubectl -n headlamp create token headlamp-admin --duration=8h`) and never record one in
-an issue or PR. Cloudflare Tunnel routing is managed outside this manifest and targets the
-cluster-local Service; a follow-up tracks putting Cloudflare Access in front of the public
-hostname.
+chart into the dedicated `headlamp` namespace. Its ServiceAccount is deliberately bound only to a
+namespaced read-only Role; the chart's default `cluster-admin` ClusterRoleBinding is disabled.
+Cloudflare Tunnel routing is managed outside this manifest and targets the cluster-local Service.
 
 ## Updating the Application
 
