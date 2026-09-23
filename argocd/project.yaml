@@ -20,7 +20,11 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: headlamp
       server: https://kubernetes.default.svc
-  clusterResourceWhitelist: []
+  clusterResourceWhitelist:
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
