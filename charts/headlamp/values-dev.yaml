@@ -2,10 +2,15 @@ replicaCount: 1
 
 serviceAccount:
   create: true
-  name: headlamp-reader
+  name: headlamp-manager
 
-# The upstream chart defaults to cluster-admin. Headlamp must stay constrained
-# to its own namespace unless a future issue explicitly authorizes wider access.
+# SL-32 (owner-approved, 2026-09-23): Headlamp needs scoped cluster-wide
+# management (Nodes, all-namespaces, workload CRUD/scale) now that SL-33
+# (Cloudflare Access) gates the public hostname. The upstream chart's built-in
+# clusterRoleBinding grants cluster-admin (incl. secrets + RBAC edit), which
+# owner explicitly ruled out after the SL-34 incident — stay on the custom
+# headlamp-manager ClusterRole/ClusterRoleBinding in extraManifests below
+# instead of enabling this.
 clusterRoleBinding:
   create: false
 
@@ -42,34 +47,76 @@ securityContext:
     type: RuntimeDefault
 
 extraManifests:
+  # Scoped cluster-wide management ClusterRole (SL-32). Grants full CRUD on
+  # workload/networking/scaling resources cluster-wide plus read-only on
+  # nodes/PVs/storage classes and metrics, but explicitly excludes secrets and
+  # all rbac.authorization.k8s.io resources so a leaked token cannot read
+  # secrets or escalate privilege via RBAC edits.
   - |
     apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
+    kind: ClusterRole
     metadata:
-      name: headlamp-reader
+      name: headlamp-manager
     rules:
       - apiGroups: [""]
-        resources: ["pods", "pods/log", "services", "configmaps", "events"]
+        resources:
+          - pods
+          - pods/log
+          - pods/exec
+          - pods/portforward
+          - services
+          - configmaps
+          - persistentvolumeclaims
+          - endpoints
+          - events
+          - replicationcontrollers
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+      - apiGroups: [""]
+        resources: ["namespaces"]
         verbs: ["get", "list", "watch"]
       - apiGroups: ["apps"]
-        resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
-        verbs: ["get", "list", "watch"]
+        resources:
+          - deployments
+          - deployments/scale
+          - replicasets
+          - replicasets/scale
+          - statefulsets
+          - statefulsets/scale
+          - daemonsets
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
       - apiGroups: ["batch"]
         resources: ["jobs", "cronjobs"]
-        verbs: ["get", "list", "watch"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
       - apiGroups: ["networking.k8s.io"]
-        resources: ["ingresses"]
+        resources: ["ingresses", "networkpolicies"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+      - apiGroups: ["autoscaling"]
+        resources: ["horizontalpodautoscalers"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+      - apiGroups: ["policy"]
+        resources: ["poddisruptionbudgets"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+      - apiGroups: [""]
+        resources: ["nodes", "persistentvolumes"]
         verbs: ["get", "list", "watch"]
+      - apiGroups: ["storage.k8s.io"]
+        resources: ["storageclasses"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["metrics.k8s.io"]
+        resources: ["nodes", "pods"]
+        verbs: ["get", "list", "watch"]
+      # secrets and rbac.authorization.k8s.io are intentionally absent from
+      # every rule above -- do not add them without a new owner decision.
   - |
     apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
+    kind: ClusterRoleBinding
     metadata:
-      name: headlamp-reader
+      name: headlamp-manager
     subjects:
       - kind: ServiceAccount
-        name: headlamp-reader
+        name: headlamp-manager
         namespace: headlamp
     roleRef:
       apiGroup: rbac.authorization.k8s.io
-      kind: Role
-      name: headlamp-reader
+      kind: ClusterRole
+      name: headlamp-manager
