@@ -2,12 +2,16 @@ replicaCount: 1
 
 serviceAccount:
   create: true
-  name: headlamp-reader
+  name: headlamp-admin
 
-# The upstream chart defaults to cluster-admin. Headlamp must stay constrained
-# to its own namespace unless a future issue explicitly authorizes wider access.
+# SL-32 (owner-approved, reverses the SL-17 least-privilege decision): Andy uses
+# Headlamp as a remote cluster management UI, so it now needs cluster-admin.
+# Headlamp is publicly exposed via Cloudflare Tunnel, so the bearer token this
+# SA can mint equals full cluster control — mint short-lived tokens only
+# (kubectl -n headlamp create token headlamp-admin --duration=8h), and see SL-33
+# for the follow-up to add Cloudflare Access in front of the public hostname.
 clusterRoleBinding:
-  create: false
+  create: true
 
 persistentVolumeClaim:
   enabled: false
@@ -41,35 +45,5 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-extraManifests:
-  - |
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
-    metadata:
-      name: headlamp-reader
-    rules:
-      - apiGroups: [""]
-        resources: ["pods", "pods/log", "services", "configmaps", "events"]
-        verbs: ["get", "list", "watch"]
-      - apiGroups: ["apps"]
-        resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
-        verbs: ["get", "list", "watch"]
-      - apiGroups: ["batch"]
-        resources: ["jobs", "cronjobs"]
-        verbs: ["get", "list", "watch"]
-      - apiGroups: ["networking.k8s.io"]
-        resources: ["ingresses"]
-        verbs: ["get", "list", "watch"]
-  - |
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    metadata:
-      name: headlamp-reader
-    subjects:
-      - kind: ServiceAccount
-        name: headlamp-reader
-        namespace: headlamp
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: Role
-      name: headlamp-reader
+# The namespaced headlamp-reader Role/RoleBinding from SL-17 are removed: the SA
+# is renamed to headlamp-admin and cluster-admin (above) supersedes them.
