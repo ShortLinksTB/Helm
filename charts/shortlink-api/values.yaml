@@ -17,6 +17,7 @@ ingress:
   host: api-shortlink-dev.giamha.online
 
 env:
+  aspnetEnvironment: Production
   databaseSecretName: shortlink-mssql
   databaseSecretKey: connection-string
   keycloakAuthority: http://keycloak.shortlink-infra-dev.svc.cluster.local:8080/realms/shortlink
