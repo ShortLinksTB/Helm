@@ -57,6 +57,9 @@ minio:
 
 keycloak:
   image: quay.io/keycloak/keycloak:26.2.5
+  hostname: https://keycloak-shortlink-dev.giamha.online
+  hostnameAdmin: https://keycloak-shortlink-dev.giamha.online
+  proxyHeaders: xforwarded
   resources:
     requests:
       cpu: 250m
