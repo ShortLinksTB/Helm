@@ -100,3 +100,14 @@ tempo:
     limits:
       cpu: 500m
       memory: 512Mi
+
+redisInsight:
+  image: redis/redisinsight:3.8.0
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
