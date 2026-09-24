@@ -1,4 +1,4 @@
 image:
   repository: ghcr.io/shortlinkstb/shortlink-api
-  tag: 34695152e9c2032eab4bb75b4657ff70562b0677
+  tag: e8b7340c52b55624ba57ef78aec79a8c3bdaf034
   pullPolicy: IfNotPresent
