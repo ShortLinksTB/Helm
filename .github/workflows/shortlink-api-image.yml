@@ -1,0 +1,32 @@
+name: Update ShortLink API image
+
+on:
+  repository_dispatch:
+    types: [shortlink-api-image-published]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.event.client_payload.environment == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Update dev image tag
+        env:
+          TAG: ${{ github.event.client_payload.tag }}
+        run: sed -i -E "s/^  tag: .*/  tag: ${TAG}/" charts/shortlink-api/values-dev.yaml
+
+      - name: Commit image update
+        env:
+          TAG: ${{ github.event.client_payload.tag }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add charts/shortlink-api/values-dev.yaml
+          git diff --cached --quiet || git commit -m "chore(shortlink-api): deploy ${TAG} to dev"
+          git push origin main
