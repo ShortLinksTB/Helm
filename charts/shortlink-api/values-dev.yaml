@@ -1,3 +1,5 @@
+replicaCount: 2
+
 image:
   repository: ghcr.io/shortlinkstb/shortlink-api
   tag: 3def58b6d8ca98d1038cc02da9472515c4d10de4
