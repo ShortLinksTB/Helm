@@ -1,0 +1,28 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/shortlinkstb/shortlink-api
+  tag: dev
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api-shortlink-dev.giamha.online
+
+env:
+  databaseSecretName: shortlink-mssql
+  databaseSecretKey: connection-string
+  keycloakAuthority: http://keycloak.shortlink-infra-dev.svc.cluster.local:8080/realms/shortlink
+  keycloakAudience: admin
+  corsOrigins:
+    - https://app-shortlink-dev.giamha.online
+    - https://admin-shortlink-dev.giamha.online
+
+resources: {}
