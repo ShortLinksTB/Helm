@@ -1,5 +1,16 @@
 credentialsSecret: shortlink-infra-credentials
 
+dbgate:
+  image: dbgate/dbgate:latest
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
 mssql:
   image: mcr.microsoft.com/mssql/server:2022-CU18-ubuntu-22.04
   storage: 10Gi
