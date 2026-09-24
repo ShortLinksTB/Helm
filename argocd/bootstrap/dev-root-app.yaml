@@ -8,6 +8,13 @@ metadata:
 spec:
   project: shortlink
   sources:
+    - repoURL: git@github.com:ShortLinksTB/Helm.git
+      targetRevision: main
+      path: charts/shortlink-api
+      helm:
+        releaseName: shortlink-api
+        valueFiles:
+          - values-dev.yaml
     - repoURL: git@github.com:ShortLinksTB/AdminUI.git
       targetRevision: dev
       path: charts/adminui
