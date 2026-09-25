@@ -75,6 +75,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.env.minioCredentialsSecretName }}
                   key: {{ .Values.env.minioSecretKeySecretKey }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.redisPasswordSecretName }}
+                  key: {{ .Values.env.redisPasswordSecretKey }}
+            - name: ConnectionStrings__Redis
+              value: "{{ .Values.env.redisEndpoint }},password=$(REDIS_PASSWORD)"
             {{- range $index, $origin := .Values.env.corsOrigins }}
             - name: Cors__AllowedOrigins__{{ $index }}
               value: {{ $origin | quote }}

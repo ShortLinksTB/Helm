@@ -32,6 +32,9 @@ env:
   minioCredentialsSecretName: shortlink-infra-credentials
   minioAccessKeySecretKey: minio-root-user
   minioSecretKeySecretKey: minio-root-password
+  redisEndpoint: redis.shortlink-infra-dev.svc.cluster.local:6379
+  redisPasswordSecretName: shortlink-infra-credentials
+  redisPasswordSecretKey: redis-password
   corsOrigins:
     - https://app-shortlink-dev.giamha.online
     - https://admin-shortlink-dev.giamha.online
