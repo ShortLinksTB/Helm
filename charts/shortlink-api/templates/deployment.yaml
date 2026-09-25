@@ -59,6 +59,22 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.env.rabbitMqCredentialsSecretName }}
                   key: {{ .Values.env.rabbitMqPasswordSecretKey }}
+            - name: Minio__Endpoint
+              value: {{ .Values.env.minioEndpoint | quote }}
+            - name: Minio__Bucket
+              value: {{ .Values.env.minioBucket | quote }}
+            - name: Minio__UseSsl
+              value: {{ .Values.env.minioUseSsl | quote }}
+            - name: Minio__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioCredentialsSecretName }}
+                  key: {{ .Values.env.minioAccessKeySecretKey }}
+            - name: Minio__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioCredentialsSecretName }}
+                  key: {{ .Values.env.minioSecretKeySecretKey }}
             {{- range $index, $origin := .Values.env.corsOrigins }}
             - name: Cors__AllowedOrigins__{{ $index }}
               value: {{ $origin | quote }}
