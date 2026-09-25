@@ -43,6 +43,22 @@ spec:
               value: {{ .Values.env.keycloakAuthority | quote }}
             - name: Keycloak__Audience
               value: {{ .Values.env.keycloakAudience | quote }}
+            - name: RabbitMq__Host
+              value: {{ .Values.env.rabbitMqHost | quote }}
+            - name: RabbitMq__Port
+              value: {{ .Values.env.rabbitMqPort | quote }}
+            - name: RabbitMq__VirtualHost
+              value: {{ .Values.env.rabbitMqVirtualHost | quote }}
+            - name: RabbitMq__Username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.rabbitMqCredentialsSecretName }}
+                  key: {{ .Values.env.rabbitMqUsernameSecretKey }}
+            - name: RabbitMq__Password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.rabbitMqCredentialsSecretName }}
+                  key: {{ .Values.env.rabbitMqPasswordSecretKey }}
             {{- range $index, $origin := .Values.env.corsOrigins }}
             - name: Cors__AllowedOrigins__{{ $index }}
               value: {{ $origin | quote }}

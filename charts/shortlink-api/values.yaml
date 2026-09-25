@@ -26,5 +26,11 @@ env:
   corsOrigins:
     - https://app-shortlink-dev.giamha.online
     - https://admin-shortlink-dev.giamha.online
+  rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
+  rabbitMqPort: 5672
+  rabbitMqVirtualHost: /
+  rabbitMqCredentialsSecretName: shortlink-infra-credentials
+  rabbitMqUsernameSecretKey: rabbitmq-username
+  rabbitMqPasswordSecretKey: rabbitmq-password
 
 resources: {}
