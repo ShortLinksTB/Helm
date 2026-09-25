@@ -39,16 +39,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.env.databaseSecretName }}
                   key: {{ .Values.env.databaseSecretKey }}
-            - name: RabbitMq__Username
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.env.rabbitMqSecretName }}
-                  key: {{ .Values.env.rabbitMqUsernameKey }}
-            - name: RabbitMq__Password
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.env.rabbitMqSecretName }}
-                  key: {{ .Values.env.rabbitMqPasswordKey }}
             - name: Keycloak__Authority
               value: {{ .Values.env.keycloakAuthority | quote }}
             - name: Keycloak__Audience
