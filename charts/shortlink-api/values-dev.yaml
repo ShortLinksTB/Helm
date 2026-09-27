@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/shortlinkstb/shortlink-api
-  tag: 9fcde503ffdc88a047e05f7b93a4a59a86af9dd6
+  tag: 51e6fd1536b88f36e011fb782d879db7887a86fb
   pullPolicy: IfNotPresent
 
 env:
