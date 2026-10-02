@@ -46,6 +46,10 @@ rabbitmq:
 
 minio:
   image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+  ingress:
+    enabled: true
+    className: nginx
+    host: minio-s3-shortlink-dev.giamha.online
   storage: 10Gi
   resources:
     requests:
