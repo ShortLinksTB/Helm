@@ -65,6 +65,10 @@ spec:
               value: {{ .Values.env.minioBucket | quote }}
             - name: Minio__UseSsl
               value: {{ .Values.env.minioUseSsl | quote }}
+            - name: Minio__PublicEndpoint
+              value: {{ .Values.env.minioPublicEndpoint | quote }}
+            - name: Minio__PublicUseSsl
+              value: {{ .Values.env.minioPublicUseSsl | quote }}
             - name: Minio__AccessKey
               valueFrom:
                 secretKeyRef:

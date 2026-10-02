@@ -9,3 +9,5 @@ env:
   aspnetEnvironment: Development
   keycloakRequireHttpsMetadata: false
   keycloakAudience: account
+  minioPublicEndpoint: minio-s3-shortlink-dev.giamha.online
+  minioPublicUseSsl: true
