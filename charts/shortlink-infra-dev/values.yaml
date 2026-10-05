@@ -33,6 +33,16 @@ redis:
       cpu: 500m
       memory: 512Mi
 
+redisExporter:
+  image: oliver006/redis_exporter:v1.69.0
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
 rabbitmq:
   image: rabbitmq:3.13.7-management
   storage: 5Gi
@@ -43,6 +53,17 @@ rabbitmq:
     limits:
       cpu: "1"
       memory: 1Gi
+
+prometheus:
+  image: prom/prometheus:v3.5.0
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 minio:
   image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
