@@ -43,6 +43,15 @@ data:
         isDefault: true
         jsonData:
           httpMethod: POST
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  labels:
+    {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
+    app.kubernetes.io/name: grafana
+data:
   dashboards.yaml: |
     apiVersion: 1
     providers:
@@ -53,15 +62,6 @@ data:
         updateIntervalSeconds: 30
         options:
           path: /var/lib/grafana/dashboards
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: grafana-dashboards
-  labels:
-    {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
-    app.kubernetes.io/name: grafana
-data:
   shortlink-infrastructure.json: |
     {"annotations":{"list":[]},"editable":false,"panels":[{"datasource":{"type":"prometheus","uid":"Prometheus"},"fieldConfig":{"defaults":{"unit":"short"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":0},"id":1,"targets":[{"expr":"redis_up","legendFormat":"Redis up","refId":"A"},{"expr":"rabbitmq_up","legendFormat":"RabbitMQ up","refId":"B"}],"title":"Availability","type":"timeseries"},{"datasource":{"type":"prometheus","uid":"Prometheus"},"fieldConfig":{"defaults":{"unit":"short"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":0},"id":2,"targets":[{"expr":"redis_connected_clients","legendFormat":"Redis clients","refId":"A"},{"expr":"rabbitmq_connections","legendFormat":"RabbitMQ connections","refId":"B"}],"title":"Connections","type":"timeseries"},{"datasource":{"type":"prometheus","uid":"Prometheus"},"fieldConfig":{"defaults":{"unit":"short"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":8},"id":3,"targets":[{"expr":"rate(redis_commands_processed_total[5m])","legendFormat":"Redis commands/s","refId":"A"},{"expr":"rate(rabbitmq_channel_messages_published_total[5m])","legendFormat":"RabbitMQ published/s","refId":"B"}],"title":"Throughput","type":"timeseries"},{"datasource":{"type":"prometheus","uid":"Prometheus"},"fieldConfig":{"defaults":{"unit":"short"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":8},"id":4,"targets":[{"expr":"rabbitmq_queue_messages_ready","legendFormat":"Ready {{`{{`}}queue{{`}}`}}","refId":"A"},{"expr":"rabbitmq_queue_messages_unacked","legendFormat":"Unacked {{`{{`}}queue{{`}}`}}","refId":"B"}],"title":"Queue and DLQ depth","type":"timeseries"}],"schemaVersion":39,"title":"ShortLink infrastructure","uid":"shortlink-infra"}
 ---
