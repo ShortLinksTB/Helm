@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shortlink-infra-prd
+  namespace: argocd
+spec:
+  project: shortlink
+  source:
+    repoURL: git@github.com:ShortLinksTB/Helm.git
+    targetRevision: main
+    path: charts/shortlink-infra-prd
+    helm:
+      releaseName: shortlink-infra-prd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shortlink-infra-prd
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
