@@ -12,3 +12,9 @@ env:
   keycloakAudience: account
   minioPublicEndpoint: minio-s3-shortlink-dev.giamha.online
   minioPublicUseSsl: true
+  geoIpFixtureEnabled: true
+  geoIpFixtureSuccessIp: 198.51.100.10
+  geoIpFixtureSuccessCountry: US
+  geoIpFixtureFailureIp: 198.51.100.11
+  geoIpFixtureFailureMode: timeout
+  geoIpFixtureFailureDelayMilliseconds: 250

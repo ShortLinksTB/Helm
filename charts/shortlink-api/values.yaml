@@ -17,6 +17,12 @@ ingress:
   host: api-shortlink-dev.giamha.online
 
 env:
+  geoIpFixtureEnabled: false
+  geoIpFixtureSuccessIp: 198.51.100.10
+  geoIpFixtureSuccessCountry: US
+  geoIpFixtureFailureIp: 198.51.100.11
+  geoIpFixtureFailureMode: timeout
+  geoIpFixtureFailureDelayMilliseconds: 250
   aspnetEnvironment: Production
   keycloakRequireHttpsMetadata: true
   databaseSecretName: shortlink-mssql

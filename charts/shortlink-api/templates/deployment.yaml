@@ -36,6 +36,18 @@ spec:
               value: {{ .Values.env.keycloakRequireHttpsMetadata | quote }}
             - name: Database__ApplyMigrations
               value: "true"
+            - name: GeoIp__Fixture__Enabled
+              value: {{ .Values.env.geoIpFixtureEnabled | default false | quote }}
+            - name: GeoIp__Fixture__SuccessIp
+              value: {{ .Values.env.geoIpFixtureSuccessIp | default "198.51.100.10" | quote }}
+            - name: GeoIp__Fixture__SuccessCountry
+              value: {{ .Values.env.geoIpFixtureSuccessCountry | default "US" | quote }}
+            - name: GeoIp__Fixture__FailureIp
+              value: {{ .Values.env.geoIpFixtureFailureIp | default "198.51.100.11" | quote }}
+            - name: GeoIp__Fixture__FailureMode
+              value: {{ .Values.env.geoIpFixtureFailureMode | default "timeout" | quote }}
+            - name: GeoIp__Fixture__FailureDelayMilliseconds
+              value: {{ .Values.env.geoIpFixtureFailureDelayMilliseconds | default 250 | quote }}
             - name: ConnectionStrings__ShortLinkDb
               valueFrom:
                 secretKeyRef:
