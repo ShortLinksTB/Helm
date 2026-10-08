@@ -1,0 +1,152 @@
+credentialsSecret: shortlink-infra-credentials
+
+dbgate:
+  image: dbgate/dbgate:latest
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+mssql:
+  image: mcr.microsoft.com/mssql/server:2022-CU18-ubuntu-22.04
+  storage: 10Gi
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+
+redis:
+  image: redis:7.4.2-alpine
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redisExporter:
+  image: oliver006/redis_exporter:v1.69.0
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+rabbitmq:
+  image: rabbitmq:3.13.7-management
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+prometheus:
+  image: prom/prometheus:v3.5.0
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+minio:
+  image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+  ingress:
+    enabled: true
+    className: nginx
+    host: minio.surl.blog
+  storage: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+keycloak:
+  image: quay.io/keycloak/keycloak:26.2.5
+  hostname: https://keycloak.surl.blog
+  hostnameAdmin: https://keycloak.surl.blog
+  proxyHeaders: xforwarded
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+
+sonarqube:
+  image: sonarqube:25.4.0.105899-community
+  storage: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1.5Gi
+    limits:
+      cpu: "2"
+      memory: 3Gi
+
+sonarqubePostgresql:
+  image: postgres:15.12-alpine
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+grafana:
+  image: grafana/grafana:11.6.0
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+tempo:
+  image: grafana/tempo:2.6.1
+  mcImage: quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z
+  storage: 5Gi
+  bucket: tempo-traces
+  retention: 168h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redisInsight:
+  image: redis/redisinsight:3.8.0
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

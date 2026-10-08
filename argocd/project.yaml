@@ -4,7 +4,7 @@ metadata:
   name: shortlink
   namespace: argocd
 spec:
-  description: ShortLink workspace — dev environment
+  description: ShortLink workspace — dev and production environments
   sourceRepos:
     - git@github.com:ShortLinksTB/Helm.git
     - https://kubernetes-sigs.github.io/headlamp/
@@ -15,6 +15,10 @@ spec:
     - namespace: shortlink-dev
       server: https://kubernetes.default.svc
     - namespace: shortlink-infra-dev
+      server: https://kubernetes.default.svc
+    - namespace: shortlink-prd
+      server: https://kubernetes.default.svc
+    - namespace: shortlink-infra-prd
       server: https://kubernetes.default.svc
     - namespace: argocd
       server: https://kubernetes.default.svc

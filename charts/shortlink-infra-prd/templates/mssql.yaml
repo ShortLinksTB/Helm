@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql
+  labels:
+    {{- include "shortlink-infra-prd.labels" . | nindent 4 }}
+    app.kubernetes.io/name: mssql
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: mssql
+  ports:
+    - name: tds
+      port: 1433
+      targetPort: tds
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mssql
+  labels:
+    {{- include "shortlink-infra-prd.labels" . | nindent 4 }}
+    app.kubernetes.io/name: mssql
+spec:
+  serviceName: mssql
+  replicas: 1
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mssql
+  template:
+    metadata:
+      labels:
+        {{- include "shortlink-infra-prd.labels" . | nindent 8 }}
+        app.kubernetes.io/name: mssql
+    spec:
+      securityContext:
+        fsGroup: 10001
+      containers:
+        - name: mssql
+          image: {{ .Values.mssql.image | quote }}
+          ports:
+            - name: tds
+              containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_PID
+              value: Developer
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.credentialsSecret }}
+                  key: mssql-sa-password
+          readinessProbe:
+            tcpSocket:
+              port: tds
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: tds
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.mssql.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/opt/mssql
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          helm.sh/resource-policy: keep
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.mssql.storage }}

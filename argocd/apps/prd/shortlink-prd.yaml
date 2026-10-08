@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shortlink-prd
+  namespace: argocd
+spec:
+  project: shortlink
+  sources:
+    - repoURL: git@github.com:ShortLinksTB/Helm.git
+      targetRevision: main
+      path: charts/shortlink-api
+      helm:
+        releaseName: shortlink-api
+        valueFiles:
+          - values-prd.yaml
+    - repoURL: git@github.com:ShortLinksTB/AdminUI.git
+      targetRevision: main
+      path: charts/adminui
+      helm:
+        releaseName: adminui-prd
+        valueFiles:
+          - values-prd.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shortlink-prd
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
