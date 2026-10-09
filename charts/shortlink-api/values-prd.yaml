@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/shortlinkstb/shortlink-api
   # Promote the image currently deployed by the dev gate; Git source remains main.
-  tag: "2b3435ed342fa9d47a7ea6ba2cf00ad4c1c3a471"
+  tag: "957cc794a679048c3fc39ab88f44635615d70f5d"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
