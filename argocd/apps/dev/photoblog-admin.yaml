@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: photoblog-admin-dev
+  namespace: argocd
+spec:
+  project: shortlink
+  source:
+    repoURL: git@github.com:ShortLinksTB/Helm.git
+    targetRevision: main
+    path: charts/photoblog-admin
+    helm:
+      releaseName: photoblog-admin
+      valueFiles: [values-dev.yaml]
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: photoblog-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
