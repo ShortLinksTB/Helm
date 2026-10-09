@@ -1,0 +1,7 @@
+﻿apiVersion: v2
+name: photoblog-admin
+description: AdminUI placeholder chart (nginx static "Coming soon" page) until the real app is implemented
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
