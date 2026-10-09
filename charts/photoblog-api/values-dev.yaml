@@ -3,7 +3,7 @@
 image:
   repository: ghcr.io/shortlinkstb/photoblog-api
   tag: dev
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 imagePullSecrets:
   - name: ghcr-pull
