@@ -53,10 +53,6 @@ env:
   rabbitMqCredentialsSecretName: shortlink-infra-credentials
   rabbitMqUsernameSecretKey: rabbitmq-username
   rabbitMqPasswordSecretKey: rabbitmq-password
-  emailProvider: ""
-  emailResendEndpoint: ""
-  emailResendApiKeySecretName: ""
-  emailResendApiKeySecretKey: ""
 
 resources: {}
 
