@@ -8,6 +8,20 @@ image:
 imagePullSecrets:
   - name: ghcr-pull
 
+static:
+  enabled: false
+  indexHtml: |-
+    <!doctype html><html><head><meta charset="utf-8"><title>PhotoBlog Admin</title></head><body><main><h1>PhotoBlog Admin</h1><p>Scaffold ready.</p></main></body></html>
+  nginxConf: |-
+    events {}
+    http {
+      server {
+        listen 80;
+        root /usr/share/nginx/html;
+        location / { try_files $uri /index.html; }
+      }
+    }
+
 service:
   type: ClusterIP
   port: 80

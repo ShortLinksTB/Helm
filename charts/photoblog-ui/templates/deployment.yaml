@@ -23,6 +23,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if ne .Values.image.repository "nginx" }}
           env:
             - name: DOTNET_USE_POLLING_FILE_WATCHER
               value: "1"
@@ -42,11 +43,22 @@ spec:
                   name: {{ .Values.otel.headersSecret.name }}
                   key: {{ .Values.otel.headersSecret.key }}
             {{- end }}
+          {{- end }}
           volumeMounts:
             - name: runtime-config
               mountPath: /usr/share/nginx/html/config.js
               subPath: config.js
               readOnly: true
+            {{- if .Values.static.enabled }}
+            - name: static
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: static
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+              readOnly: true
+            {{- end }}
           ports:
             - name: http
               containerPort: 8080
@@ -78,4 +90,9 @@ spec:
         - name: runtime-config
           configMap:
             name: {{ .Release.Name }}-runtime
+        {{- if .Values.static.enabled }}
+        - name: static
+          configMap:
+            name: {{ .Release.Name }}-static
+        {{- end }}
 
