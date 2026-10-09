@@ -5,7 +5,8 @@ image:
   tag: dev
   pullPolicy: IfNotPresent
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: ghcr-pull
 
 service:
   port: 8080
