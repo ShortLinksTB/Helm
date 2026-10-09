@@ -107,6 +107,17 @@ spec:
                   key: {{ .Values.env.redisPasswordSecretKey }}
             - name: ConnectionStrings__Redis
               value: "{{ .Values.env.redisEndpoint }},password=$(REDIS_PASSWORD)"
+            {{- if .Values.env.emailProvider }}
+            - name: Email__Provider
+              value: {{ .Values.env.emailProvider | quote }}
+            - name: Email__ResendEndpoint
+              value: {{ .Values.env.emailResendEndpoint | quote }}
+            - name: Email__ResendApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.emailResendApiKeySecretName }}
+                  key: {{ .Values.env.emailResendApiKeySecretKey }}
+            {{- end }}
             {{- range $index, $origin := .Values.env.corsOrigins }}
             - name: Cors__AllowedOrigins__{{ $index }}
               value: {{ $origin | quote }}
