@@ -28,6 +28,17 @@ spec:
           ports:
             - name: http
               containerPort: 80
+          {{- if .Values.static.enabled }}
+          volumeMounts:
+            - name: static
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: static
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+              readOnly: true
+          {{- end }}
           readinessProbe:
             httpGet:
               path: /
@@ -38,4 +49,10 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.static.enabled }}
+      volumes:
+        - name: static
+          configMap:
+            name: {{ .Release.Name }}-static
+      {{- end }}
 

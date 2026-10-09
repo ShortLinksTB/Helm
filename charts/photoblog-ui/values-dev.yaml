@@ -1,8 +1,12 @@
 ﻿replicaCount: 1
 
 image:
-  repository: ghcr.io/shortlinkstb/photoblog-ui
-  tag: "5e84a9c38105463c09d1ab0caf4f9c998b7f38e7"
+  repository: nginx
+  tag: alpine
+
+imagePullSecrets: []
+static:
+  enabled: true
 
 ingress:
   enabled: true

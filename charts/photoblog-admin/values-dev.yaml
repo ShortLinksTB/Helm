@@ -2,6 +2,14 @@
 # defaults as values.yaml; override here once real app config is needed.
 replicaCount: 1
 
+image:
+  repository: nginx
+  tag: alpine
+
+imagePullSecrets: []
+static:
+  enabled: true
+
 ingress:
   enabled: true
   className: nginx
