@@ -57,6 +57,13 @@ spec:
               value: {{ .Values.env.keycloakAuthority | quote }}
             - name: Keycloak__Audience
               value: {{ .Values.env.keycloakAudience | quote }}
+            - name: Jwt__Issuer
+              value: {{ .Values.env.jwtIssuer | quote }}
+            - name: Jwt__SigningKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.jwtSigningKeySecretName }}
+                  key: {{ .Values.env.jwtSigningKeySecretKey }}
             - name: RabbitMq__Host
               value: {{ .Values.env.rabbitMqHost | quote }}
             - name: RabbitMq__Port
