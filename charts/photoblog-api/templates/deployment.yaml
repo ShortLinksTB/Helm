@@ -1,0 +1,121 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "photoblog-api.fullname" . }}
+  labels:
+    {{- include "photoblog-api.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "photoblog-api.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "photoblog-api.labels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: photoblog-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: DOTNET_USE_POLLING_FILE_WATCHER
+              value: "true"
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{ .Values.env.aspnetEnvironment | quote }}
+            - name: Keycloak__RequireHttpsMetadata
+              value: {{ .Values.env.keycloakRequireHttpsMetadata | quote }}
+            - name: Database__ApplyMigrations
+              value: "true"
+            - name: GeoIp__Fixture__Enabled
+              value: {{ .Values.env.geoIpFixtureEnabled | default false | quote }}
+            - name: GeoIp__Fixture__SuccessIp
+              value: {{ .Values.env.geoIpFixtureSuccessIp | default "198.51.100.10" | quote }}
+            - name: GeoIp__Fixture__SuccessCountry
+              value: {{ .Values.env.geoIpFixtureSuccessCountry | default "US" | quote }}
+            - name: GeoIp__Fixture__FailureIp
+              value: {{ .Values.env.geoIpFixtureFailureIp | default "198.51.100.11" | quote }}
+            - name: GeoIp__Fixture__FailureMode
+              value: {{ .Values.env.geoIpFixtureFailureMode | default "timeout" | quote }}
+            - name: GeoIp__Fixture__FailureDelayMilliseconds
+              value: {{ .Values.env.geoIpFixtureFailureDelayMilliseconds | default 250 | quote }}
+            - name: ConnectionStrings__ShortLinkDb
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.databaseSecretName }}
+                  key: {{ .Values.env.databaseSecretKey }}
+            - name: Keycloak__Authority
+              value: {{ .Values.env.keycloakAuthority | quote }}
+            - name: Keycloak__Audience
+              value: {{ .Values.env.keycloakAudience | quote }}
+            - name: RabbitMq__Host
+              value: {{ .Values.env.rabbitMqHost | quote }}
+            - name: RabbitMq__Port
+              value: {{ .Values.env.rabbitMqPort | quote }}
+            - name: RabbitMq__VirtualHost
+              value: {{ .Values.env.rabbitMqVirtualHost | quote }}
+            - name: RabbitMq__Username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.rabbitMqCredentialsSecretName }}
+                  key: {{ .Values.env.rabbitMqUsernameSecretKey }}
+            - name: RabbitMq__Password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.rabbitMqCredentialsSecretName }}
+                  key: {{ .Values.env.rabbitMqPasswordSecretKey }}
+            - name: Minio__Endpoint
+              value: {{ .Values.env.minioEndpoint | quote }}
+            - name: Minio__Bucket
+              value: {{ .Values.env.minioBucket | quote }}
+            - name: Minio__UseSsl
+              value: {{ .Values.env.minioUseSsl | quote }}
+            - name: Minio__PublicEndpoint
+              value: {{ .Values.env.minioPublicEndpoint | quote }}
+            - name: Minio__PublicUseSsl
+              value: {{ .Values.env.minioPublicUseSsl | quote }}
+            - name: Minio__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioCredentialsSecretName }}
+                  key: {{ .Values.env.minioAccessKeySecretKey }}
+            - name: Minio__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioCredentialsSecretName }}
+                  key: {{ .Values.env.minioSecretKeySecretKey }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.redisPasswordSecretName }}
+                  key: {{ .Values.env.redisPasswordSecretKey }}
+            - name: ConnectionStrings__Redis
+              value: "{{ .Values.env.redisEndpoint }},password=$(REDIS_PASSWORD)"
+            {{- range $index, $origin := .Values.env.corsOrigins }}
+            - name: Cors__AllowedOrigins__{{ $index }}
+              value: {{ $origin | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+

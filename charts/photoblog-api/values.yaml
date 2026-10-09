@@ -1,0 +1,55 @@
+﻿replicaCount: 1
+
+image:
+  repository: ghcr.io/shortlinkstb/photoblog-api
+  tag: dev
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api-shortlink-dev.giamha.online
+
+env:
+  geoIpFixtureEnabled: false
+  geoIpFixtureSuccessIp: 198.51.100.10
+  geoIpFixtureSuccessCountry: US
+  geoIpFixtureFailureIp: 198.51.100.11
+  geoIpFixtureFailureMode: timeout
+  geoIpFixtureFailureDelayMilliseconds: 250
+  aspnetEnvironment: Production
+  keycloakRequireHttpsMetadata: true
+  databaseSecretName: shortlink-mssql
+  databaseSecretKey: connection-string
+  rabbitMqSecretName: shortlink-infra-credentials
+  rabbitMqUsernameKey: rabbitmq-username
+  rabbitMqPasswordKey: rabbitmq-password
+  keycloakAuthority: http://keycloak.shortlink-infra-dev.svc.cluster.local:8080/realms/shortlink
+  keycloakAudience: admin
+  minioEndpoint: minio-s3-shortlink-dev.giamha.online:9000
+  minioBucket: shortlink-ads
+  minioUseSsl: true
+  minioCredentialsSecretName: shortlink-infra-credentials
+  minioAccessKeySecretKey: minio-root-user
+  minioSecretKeySecretKey: minio-root-password
+  redisEndpoint: redis.shortlink-infra-dev.svc.cluster.local:6379
+  redisPasswordSecretName: shortlink-infra-credentials
+  redisPasswordSecretKey: redis-password
+  corsOrigins:
+    - https://app-shortlink-dev.giamha.online
+    - https://admin-shortlink-dev.giamha.online
+  rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
+  rabbitMqPort: 5672
+  rabbitMqVirtualHost: /
+  rabbitMqCredentialsSecretName: shortlink-infra-credentials
+  rabbitMqUsernameSecretKey: rabbitmq-username
+  rabbitMqPasswordSecretKey: rabbitmq-password
+
+resources: {}
+

@@ -1,0 +1,43 @@
+﻿replicaCount: 1
+
+otel:
+  endpoint: ""
+  headersSecret:
+    name: ""
+    key: ""
+
+image:
+  repository: ghcr.io/shortlinkstb/photoblog-ui
+  tag: "328102afd4fd0d4fc99ca7b62f1c5d748b1da6ed"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  type: ClusterIP
+  port: 80
+
+api:
+  baseUrl: "https://api-shortlink-dev.giamha.online"
+  guestBaseUrl: "https://app-shortlink-dev.giamha.online"
+
+database:
+  connectionStringSecret:
+    name: shortlink-mssql
+    key: connection-string
+
+publicOrigin: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  host: app-shortlink-dev.giamha.online
+resources:
+  requests:
+    cpu: 10m
+    memory: 16Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi
+

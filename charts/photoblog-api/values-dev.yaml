@@ -1,0 +1,55 @@
+﻿replicaCount: 1
+
+image:
+  repository: ghcr.io/shortlinkstb/photoblog-api
+  tag: dev
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+service:
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: photoblog-api-dev.giamha.online
+
+database:
+  connectionStringSecret:
+    name: photoblog-db
+    key: connection-string
+
+env:
+  databaseSecretName: photoblog-db
+  databaseSecretKey: connection-string
+  rabbitMqCredentialsSecretName: photoblog-infra-credentials
+  rabbitMqUsernameSecretKey: rabbitmq-username
+  rabbitMqPasswordSecretKey: rabbitmq-password
+  rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
+  rabbitMqPort: 5672
+  rabbitMqVirtualHost: /
+  minioEndpoint: minio.shortlink-infra-dev.svc.cluster.local:9000
+  minioBucket: photoblog-media
+  minioUseSsl: false
+  minioCredentialsSecretName: photoblog-minio-credentials
+  minioAccessKeySecretKey: access-key
+  minioSecretKeySecretKey: secret-key
+  redisEndpoint: redis.shortlink-infra-dev.svc.cluster.local:6379
+  redisPasswordSecretName: photoblog-infra-credentials
+  redisPasswordSecretKey: redis-password
+
+  aspnetEnvironment: Development
+  keycloakRequireHttpsMetadata: true
+  keycloakAuthority: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
+  keycloakAudience: account
+  minioPublicEndpoint: minio-s3-shortlink-dev.giamha.online
+  minioPublicUseSsl: true
+  geoIpFixtureEnabled: true
+  geoIpFixtureSuccessIp: 198.51.100.10
+  geoIpFixtureSuccessCountry: US
+  geoIpFixtureFailureIp: 198.51.100.11
+  geoIpFixtureFailureMode: timeout
+  geoIpFixtureFailureDelayMilliseconds: 250
+
+

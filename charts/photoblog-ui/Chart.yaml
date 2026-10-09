@@ -1,0 +1,7 @@
+﻿apiVersion: v2
+name: photoblog-ui
+description: Guest-facing static ShortLink UI served by nginx
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+

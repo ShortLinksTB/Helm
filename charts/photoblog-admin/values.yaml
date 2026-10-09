@@ -1,0 +1,29 @@
+﻿replicaCount: 1
+
+image:
+  repository: ghcr.io/shortlinkstb/photoblog-admin
+  tag: "c5c11f43a176cc24adab54238dfa44a322032acb"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: nginx
+  host: ""
+  path: /
+  pathType: Prefix
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 16Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi
+

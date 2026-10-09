@@ -1,0 +1,12 @@
+﻿# Dev environment overrides. Placeholder chart currently uses the same
+# defaults as values.yaml; override here once real app config is needed.
+replicaCount: 1
+
+ingress:
+  enabled: true
+  className: nginx
+  host: photoblog-admin-dev.giamha.online
+  path: /
+  pathType: Prefix
+
+
