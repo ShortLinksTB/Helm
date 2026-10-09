@@ -39,6 +39,10 @@ env:
   redisEndpoint: redis.shortlink-infra-dev.svc.cluster.local:6379
   redisPasswordSecretName: photoblog-infra-credentials
   redisPasswordSecretKey: redis-password
+  emailProvider: resend
+  emailResendEndpoint: https://api.resend.com/emails
+  emailResendApiKeySecretName: photoblog-infra-credentials
+  emailResendApiKeySecretKey: resend-api-key
 
   aspnetEnvironment: Development
   keycloakRequireHttpsMetadata: true
