@@ -20,6 +20,8 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: shortlink-infra-prd
       server: https://kubernetes.default.svc
+    - namespace: photoblog-dev
+      server: https://kubernetes.default.svc
     - namespace: argocd
       server: https://kubernetes.default.svc
     - namespace: headlamp
