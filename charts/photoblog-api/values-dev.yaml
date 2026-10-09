@@ -30,7 +30,7 @@ env:
   rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
   rabbitMqPort: 5672
   rabbitMqVirtualHost: /
-  minioEndpoint: minio.shortlink-infra-dev.svc.cluster.local:9000
+  minioEndpoint: http://minio.shortlink-infra-dev.svc.cluster.local:9000
   minioBucket: photoblog-media
   minioUseSsl: false
   minioCredentialsSecretName: photoblog-minio-credentials
