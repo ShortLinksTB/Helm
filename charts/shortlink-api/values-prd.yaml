@@ -23,7 +23,7 @@ env:
   databaseSecretName: shortlink-mssql
   databaseSecretKey: connection-string
   keycloakAuthority: https://keycloak.surl.blog/realms/shortlink
-  keycloakAudience: admin
+  keycloakAudience: account
   minioEndpoint: minio.shortlink-infra-prd.svc.cluster.local:9000
   minioBucket: shortlink-ads
   minioUseSsl: false
