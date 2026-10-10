@@ -55,5 +55,8 @@ env:
   geoIpFixtureFailureIp: 198.51.100.11
   geoIpFixtureFailureMode: timeout
   geoIpFixtureFailureDelayMilliseconds: 250
+  corsOrigins:
+    - https://photoblog-dev.giamha.online
+    - https://photoblog-admin-dev.giamha.online
 
 
