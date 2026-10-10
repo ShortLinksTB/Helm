@@ -23,17 +23,6 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.static.enabled }}
-          volumeMounts:
-            - name: static
-              mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
-              readOnly: true
-            - name: static
-              mountPath: /usr/share/nginx/html/index.html
-              subPath: index.html
-              readOnly: true
-          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.containerPort }}
@@ -61,10 +50,4 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      volumes:
-        {{- if .Values.static.enabled }}
-        - name: static
-          configMap:
-            name: {{ .Release.Name }}-static
-        {{- end }}
 
