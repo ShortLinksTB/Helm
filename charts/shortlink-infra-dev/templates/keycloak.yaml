@@ -50,10 +50,16 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.credentialsSecret }}
                   key: keycloak-admin-password
+            {{- if .Values.keycloak.hostname }}
             - name: KC_HOSTNAME
               value: {{ .Values.keycloak.hostname | quote }}
+            {{- end }}
+            {{- if .Values.keycloak.hostnameAdmin }}
             - name: KC_HOSTNAME_ADMIN
               value: {{ .Values.keycloak.hostnameAdmin | quote }}
+            {{- end }}
+            - name: KC_HOSTNAME_STRICT
+              value: {{ .Values.keycloak.hostnameStrict | quote }}
             - name: KC_PROXY_HEADERS
               value: {{ .Values.keycloak.proxyHeaders | quote }}
             - name: KC_DB
