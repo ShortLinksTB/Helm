@@ -23,45 +23,14 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if ne .Values.image.repository "nginx" }}
           env:
-            - name: DOTNET_USE_POLLING_FILE_WATCHER
-              value: "1"
-            - name: ConnectionStrings__ShortLinks
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.connectionStringSecret.name }}
-                  key: {{ .Values.database.connectionStringSecret.key }}
-            - name: PublicOrigin
-              value: {{ .Values.publicOrigin | quote }}
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: {{ .Values.otel.endpoint | quote }}
-            {{- if and .Values.otel.headersSecret.name .Values.otel.headersSecret.key }}
-            - name: OTEL_EXPORTER_OTLP_HEADERS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.otel.headersSecret.name }}
-                  key: {{ .Values.otel.headersSecret.key }}
-            {{- end }}
-          {{- end }}
-          volumeMounts:
-            - name: runtime-config
-              mountPath: /usr/share/nginx/html/config.js
-              subPath: config.js
-              readOnly: true
-            {{- if .Values.static.enabled }}
-            - name: static
-              mountPath: /etc/nginx/nginx.conf
-              subPath: nginx.conf
-              readOnly: true
-            - name: static
-              mountPath: /usr/share/nginx/html/index.html
-              subPath: index.html
-              readOnly: true
-            {{- end }}
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 3000
           readinessProbe:
             httpGet:
               path: /healthz
@@ -86,13 +55,4 @@ spec:
             failureThreshold: 24
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      volumes:
-        - name: runtime-config
-          configMap:
-            name: {{ .Release.Name }}-runtime
-        {{- if .Values.static.enabled }}
-        - name: static
-          configMap:
-            name: {{ .Release.Name }}-static
-        {{- end }}
 
