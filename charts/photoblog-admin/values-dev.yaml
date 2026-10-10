@@ -1,14 +1,14 @@
-﻿# Dev environment overrides. Placeholder chart currently uses the same
-# defaults as values.yaml; override here once real app config is needed.
-replicaCount: 1
+﻿replicaCount: 1
 
 image:
-  repository: nginx
-  tag: alpine
+  repository: ghcr.io/shortlinkstb/photoblog-admin
+  tag: "b4421859f7cca875fe4720e4203a37b84121b4e9"
+  pullPolicy: IfNotPresent
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: ghcr-pull
 static:
-  enabled: true
+  enabled: false
 
 ingress:
   enabled: true
@@ -16,5 +16,3 @@ ingress:
   host: photoblog-admin-dev.giamha.online
   path: /
   pathType: Prefix
-
-
