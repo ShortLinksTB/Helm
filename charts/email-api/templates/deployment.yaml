@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "email-api.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "email-api.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "email-api.name" . }}
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: email-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: EmailSending__SendReal
+              value: {{ .Values.emailSending.sendReal | quote }}
+            - name: ConnectionStrings__EmailAPI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: {{ .Values.database.secretKey }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.infra.secretName }}
+                  key: rabbitmq-username
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.infra.secretName }}
+                  key: rabbitmq-password
+            - name: RabbitMQ__Uri
+              value: "amqp://$(RABBITMQ_USERNAME):$(RABBITMQ_PASSWORD)@{{ .Values.infra.rabbitMqHost }}:{{ .Values.infra.rabbitMqPort }}/"
+            - name: Redis__ConnectionString
+              value: "{{ .Values.infra.redisConnection }},password=$(REDIS_PASSWORD)"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.infra.secretName }}
+                  key: redis-password
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
