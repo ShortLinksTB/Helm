@@ -1,0 +1,11 @@
+{{- if .Values.fixture.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "photoblog-api.fullname" . }}-fixture
+  labels:
+    {{- include "photoblog-api.labels" . | nindent 4 }}
+data:
+  posts.json: |
+{{ .Values.fixture.postsJson | nindent 4 }}
+{{- end }}

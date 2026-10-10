@@ -56,3 +56,7 @@ env:
 
 resources: {}
 
+fixture:
+  enabled: false
+  postsJson: "[]"
+
