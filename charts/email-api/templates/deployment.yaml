@@ -43,13 +43,13 @@ spec:
                   key: rabbitmq-password
             - name: RabbitMQ__Uri
               value: "amqp://$(RABBITMQ_USERNAME):$(RABBITMQ_PASSWORD)@{{ .Values.infra.rabbitMqHost }}:{{ .Values.infra.rabbitMqPort }}/"
-            - name: Redis__ConnectionString
-              value: "{{ .Values.infra.redisConnection }},password=$(REDIS_PASSWORD)"
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.infra.secretName }}
                   key: redis-password
+            - name: Redis__ConnectionString
+              value: "{{ .Values.infra.redisConnection }},password=$(REDIS_PASSWORD)"
           livenessProbe:
             httpGet:
               path: /health/live
