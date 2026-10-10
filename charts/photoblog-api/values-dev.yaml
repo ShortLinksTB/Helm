@@ -57,6 +57,6 @@ env:
   geoIpFixtureFailureDelayMilliseconds: 250
   corsOrigins:
     - https://photoblog-dev.giamha.online
-    - https://photoblog-admin-dev.giamha.online
+    - https://admin-photoblog-dev.giamha.online
 
 
