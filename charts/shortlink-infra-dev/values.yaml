@@ -82,8 +82,11 @@ minio:
 
 keycloak:
   image: quay.io/keycloak/keycloak:26.2.5
-  hostname: https://keycloak-shortlink-dev.giamha.online
-  hostnameAdmin: https://keycloak-shortlink-dev.giamha.online
+  # Resolve the public issuer from the forwarded host so both the existing
+  # ShortLink hostname and PhotoBlog's auth hostname remain valid.
+  hostname: ""
+  hostnameAdmin: ""
+  hostnameStrict: false
   proxyHeaders: xforwarded
   resources:
     requests:
