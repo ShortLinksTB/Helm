@@ -42,9 +42,9 @@ env:
 
   aspnetEnvironment: Development
   keycloakRequireHttpsMetadata: true
-  keycloakAuthority: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
+  keycloakAuthority: https://auth.giamha.online/realms/shortlink
   keycloakAudience: account
-  jwtIssuer: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
+  jwtIssuer: https://auth.giamha.online/realms/shortlink
   jwtSigningKeySecretName: photoblog-auth
   jwtSigningKeySecretKey: signing-key
   minioPublicEndpoint: minio-s3-shortlink-dev.giamha.online
