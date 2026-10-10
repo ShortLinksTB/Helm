@@ -17,10 +17,28 @@ spec:
     spec:
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- if .Values.fixture.enabled }}
+      initContainers:
+        - name: photoblog-fixture-init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "cp /fixture/posts.json /app/data/posts.json"]
+          volumeMounts:
+            - name: photoblog-fixture-source
+              mountPath: /fixture
+              readOnly: true
+            - name: photoblog-data
+              mountPath: /app/data
+      {{- end }}
       containers:
         - name: photoblog-api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.fixture.enabled }}
+          volumeMounts:
+            - name: photoblog-data
+              mountPath: /app/data
+          {{- end }}
           ports:
             - name: http
               containerPort: 8080
@@ -125,4 +143,12 @@ spec:
             periodSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.fixture.enabled }}
+      volumes:
+        - name: photoblog-fixture-source
+          configMap:
+            name: {{ include "photoblog-api.fullname" . }}-fixture
+        - name: photoblog-data
+          emptyDir: {}
+      {{- end }}
 

@@ -59,4 +59,34 @@ env:
     - https://photoblog-dev.giamha.online
     - https://admin-photoblog-dev.giamha.online
 
+fixture:
+  enabled: true
+  postsJson: |
+    [
+      {
+        "Id": "11111111-1111-1111-1111-111111111111",
+        "Title": "Golden Hour Field Notes",
+        "Slug": "test",
+        "Markdown": "# Golden Hour Field Notes\n\nA practical guide to finding warm light, shaping shadows, and keeping skin tones natural.\n\nStart with the light behind you, then move until the background falls softly out of focus.",
+        "CategoryId": null,
+        "Tags": ["Lighting", "Field Notes"],
+        "CoverImage": "https://photoblog-dev.giamha.online/og-image.jpg",
+        "AuthorId": null,
+        "Published": true,
+        "Excerpt": "A practical guide to finding warm light and shaping shadows."
+      },
+      {
+        "Id": "22222222-2222-2222-2222-222222222222",
+        "Title": "Backlight Without the Burn",
+        "Slug": "unsafe-excerpt",
+        "Markdown": "# Backlight Without the Burn\n\n<img src=x onerror=\"alert('unsafe-excerpt')\">\n\nThis excerpt intentionally contains markup-like input so the live rendering gate can verify it is displayed safely as text.",
+        "CategoryId": null,
+        "Tags": ["Composition", "Safety"],
+        "CoverImage": "https://photoblog-dev.giamha.online/og-image.jpg",
+        "AuthorId": null,
+        "Published": true,
+        "Excerpt": "<img src=x onerror=\"alert('unsafe-excerpt')\">"
+      }
+    ]
+
 
