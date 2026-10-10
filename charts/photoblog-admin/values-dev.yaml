@@ -2,7 +2,7 @@
 
 image:
   repository: ghcr.io/shortlinkstb/photoblog-admin
-  tag: "b4421859f7cca875fe4720e4203a37b84121b4e9"
+  tag: "301d71cc0e54a06a24b7432bdf4608b12f561b0c"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -16,3 +16,4 @@ ingress:
   host: photoblog-admin-dev.giamha.online
   path: /
   pathType: Prefix
+
