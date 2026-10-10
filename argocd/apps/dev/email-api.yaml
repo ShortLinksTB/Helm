@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: email-api-dev
+  namespace: argocd
+spec:
+  project: shortlink
+  source:
+    repoURL: git@github.com:ShortLinksTB/Helm.git
+    targetRevision: main
+    path: charts/email-api
+    helm:
+      releaseName: email-api
+      valueFiles: [values-dev.yaml]
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: email-api-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

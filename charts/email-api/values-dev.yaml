@@ -1,0 +1,6 @@
+replicaCount: 1
+image:
+  tag: 63237d0c1d6f90c8e602e9cc523924b6dd98eb69
+  pullPolicy: Always
+emailSending:
+  sendReal: false

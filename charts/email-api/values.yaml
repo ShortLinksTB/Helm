@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/shortlinkstb/emailapi
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+service:
+  port: 8080
+
+database:
+  secretName: email-api-db
+  secretKey: connection-string
+
+infra:
+  secretName: email-api-infra-credentials
+  rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
+  rabbitMqPort: 5672
+  redisConnection: redis.shortlink-infra-dev.svc.cluster.local:6379
+
+emailSending:
+  sendReal: false
+
+resources: {}
