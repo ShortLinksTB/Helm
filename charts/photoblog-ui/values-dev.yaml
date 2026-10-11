@@ -3,7 +3,7 @@ containerPort: 8080
 
 image:
   repository: ghcr.io/shortlinkstb/photoblog-ui
-  tag: "bac7e7efb2ccb19b81eb768f7bec0520c655cd84"
+  tag: "06796d97c4ca1e98dfb89afc990a7b085d02e9b2"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
