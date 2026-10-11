@@ -2,7 +2,7 @@
 
 image:
   repository: ghcr.io/shortlinkstb/photoblog-admin
-  tag: "10601c9f7f251b2ffbe24b77b227851c2982b72c"
+  tag: "9dd1cc79ed8fe94c13d753a948e83f2c307c8ead"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
