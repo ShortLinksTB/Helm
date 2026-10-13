@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: rabbitmq
 spec:
   type: ClusterIP
+  externalIPs:
+    {{- toYaml .Values.rabbitmq.externalIPs | nindent 4 }}
   selector:
     app.kubernetes.io/name: rabbitmq
   ports:
