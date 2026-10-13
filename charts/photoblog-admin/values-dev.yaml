@@ -13,7 +13,7 @@ static:
 ingress:
   enabled: true
   className: nginx
-  host: photoblog-admin-dev.giamha.online
+  host: admin-photoblog-dev.giamha.online
   path: /
   pathType: Prefix
 
