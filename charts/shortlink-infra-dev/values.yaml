@@ -50,6 +50,10 @@ redisExporter:
 
 rabbitmq:
   image: rabbitmq:3.13.7-management
+  # Keep the stateful service reachable only through the homelab Tailscale IP.
+  # This is intentionally not a NodePort/LoadBalancer exposure.
+  externalIPs:
+    - 100.112.108.113
   storage: 5Gi
   resources:
     requests:
