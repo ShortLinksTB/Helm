@@ -27,7 +27,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.service.targetPort | default 80 }}
           {{- if .Values.static.enabled }}
           volumeMounts:
             - name: static

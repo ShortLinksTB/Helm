@@ -10,6 +10,9 @@ imagePullSecrets:
 static:
   enabled: false
 
+service:
+  targetPort: 8080
+
 ingress:
   enabled: true
   className: nginx
