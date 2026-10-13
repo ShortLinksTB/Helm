@@ -24,6 +24,11 @@ mssql:
 
 redis:
   image: redis:7.4.2-alpine
+  # The homelab already has an unrelated Docker redis-sandbox on host port
+  # 6379. Expose Kubernetes Redis only through the node's Tailscale IP on a
+  # distinct port; in-cluster clients continue to use redis:6379.
+  tailscaleExternalIP: 100.112.108.113
+  tailscaleExternalPort: 16379
   storage: 2Gi
   resources:
     requests:

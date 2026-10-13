@@ -17,6 +17,25 @@ spec:
       port: 9121
       targetPort: metrics
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-tailscale
+  labels:
+    {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: tailscale-entrypoint
+spec:
+  type: ClusterIP
+  externalIPs:
+    - {{ .Values.redis.tailscaleExternalIP | quote }}
+  selector:
+    app.kubernetes.io/name: redis
+  ports:
+    - name: redis-tailscale
+      port: {{ .Values.redis.tailscaleExternalPort }}
+      targetPort: redis
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
