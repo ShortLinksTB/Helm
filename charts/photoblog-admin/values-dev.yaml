@@ -1,8 +1,8 @@
 ﻿replicaCount: 1
 
 image:
-  repository: ghcr.io/shortlinkstb/photoblog-ui
-  tag: "f40049de4fc562bc46104f5dccf1c1c765f726bc"
+  repository: ghcr.io/shortlinkstb/photoblog-admin
+  tag: "4d28133cc63a96e6eb250e294b29aaf799ef4fe7"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
