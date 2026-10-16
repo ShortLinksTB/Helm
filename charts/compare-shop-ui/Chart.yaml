@@ -1,0 +1,6 @@
+apiVersion: v2
+name: compare-shop-ui
+description: CompareShop UI static web application
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

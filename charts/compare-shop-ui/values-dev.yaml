@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/shortlinkstb/compare-shop-ui
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+ingress:
+  enabled: true
+  className: nginx
+  host: compareshop-dev.giamha.online
+  path: /
+  pathType: Prefix
