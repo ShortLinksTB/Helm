@@ -1,0 +1,9 @@
+image:
+  tag: "796ad48b7032e61115d600026312665d60eeb9a5"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: admin-compareshop-dev.giamha.online
+  path: /
+  pathType: Prefix
