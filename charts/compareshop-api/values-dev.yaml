@@ -1,0 +1,14 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/shortlinkstb/compareshop-api
+  tag: f52bef725dec333c65eced1b2b75ef588f9d84da
+  pullPolicy: IfNotPresent
+ingress:
+  enabled: true
+  className: nginx
+  host: api-compareshop-dev.giamha.online
+env:
+  aspnetEnvironment: Development
+  corsOrigins:
+    - https://compareshop-dev.giamha.online
+    - https://admin-compareshop-dev.giamha.online
