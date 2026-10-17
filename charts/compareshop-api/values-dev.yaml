@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/shortlinkstb/compareshop-api
-  tag: 065c0225e5edf6ef36fda5cb0a01253be8c88983
+  tag: 5a11a1a9ad7035859e59444e387571df71bfd155
   pullPolicy: IfNotPresent
 
 service:
