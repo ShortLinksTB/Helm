@@ -1,0 +1,34 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/shortlinkstb/compareshop-api
+  tag: f52bef725dec333c65eced1b2b75ef588f9d84da
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api-compareshop-dev.giamha.online
+  path: /
+  pathType: Prefix
+
+database:
+  secretName: compareshop-api-runtime
+  secretKey: connection-string
+  applyMigrations: false
+
+env:
+  aspnetEnvironment: Production
+  keycloakAuthority: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
+  keycloakAudience: compareshop-admin-ui
+  corsOrigins:
+    - https://compareshop-dev.giamha.online
+    - https://admin-compareshop-dev.giamha.online
+  otlpEndpoint: http://tempo.shortlink-infra-dev.svc.cluster.local:4317
+  redisKeyPrefix: "compareshop:"
+  rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
+  rabbitMqQueuePrefix: compareshop.
