@@ -30,6 +30,9 @@ spec:
               value: http://+:8080
             - name: ASPNETCORE_ENVIRONMENT
               value: {{ .Values.env.aspnetEnvironment | quote }}
+            # appsettings are baked into the image; startup must not depend on host inotify capacity.
+            - name: DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE
+              value: "false"
             - name: ConnectionStrings__CompareShopDb
               valueFrom:
                 secretKeyRef:
