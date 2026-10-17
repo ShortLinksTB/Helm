@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/shortlinkstb/compareshop-api
+  tag: dev
+  pullPolicy: IfNotPresent
+imagePullSecrets:
+  - name: ghcr-pull
+service:
+  port: 8080
+ingress:
+  enabled: false
+  className: nginx
+  host: api-compareshop-dev.giamha.online
+env:
+  aspnetEnvironment: Production
+  databaseSecretName: compareshop-mssql
+  databaseSecretKey: connection-string
+  keycloakAuthority: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
+  keycloakAudience: compareshop-admin-ui
+  corsOrigins: []
+resources: {}
