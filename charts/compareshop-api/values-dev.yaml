@@ -19,7 +19,7 @@ ingress:
 database:
   secretName: compareshop-api-runtime
   secretKey: connection-string
-  applyMigrations: true
+  applyMigrations: false
 
 env:
   aspnetEnvironment: Production
