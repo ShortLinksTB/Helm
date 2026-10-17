@@ -1,0 +1,6 @@
+apiVersion: v2
+name: compareshop-api
+description: CompareShop backend API
+type: application
+version: 0.1.0
+appVersion: f52bef725dec333c65eced1b2b75ef588f9d84da
