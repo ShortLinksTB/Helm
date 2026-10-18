@@ -32,3 +32,6 @@ env:
   redisKeyPrefix: "compareshop:"
   rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
   rabbitMqQueuePrefix: compareshop.
+  affiliateRedirectTrustedProxies:
+    # Exact cloudflared pod IP observed on the public route (argocd namespace).
+    - 10.42.0.225

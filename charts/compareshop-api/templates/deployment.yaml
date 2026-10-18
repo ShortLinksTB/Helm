@@ -58,6 +58,10 @@ spec:
             - name: Cors__AllowedOrigins__{{ $index }}
               value: {{ $origin | quote }}
             {{- end }}
+            {{- range $index, $proxy := .Values.env.affiliateRedirectTrustedProxies }}
+            - name: RateLimiting__AffiliateRedirect__TrustedProxies__{{ $index }}
+              value: {{ $proxy | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health
