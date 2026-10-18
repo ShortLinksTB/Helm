@@ -44,6 +44,10 @@ spec:
               value: {{ .Values.env.keycloakAuthority | quote }}
             - name: Keycloak__Audience
               value: {{ .Values.env.keycloakAudience | quote }}
+            {{- range $index, $subject := .Values.env.bootstrapSuperAdminSubjects }}
+            - name: Admin__BootstrapSuperAdminSubjects__{{ $index }}
+              value: {{ $subject | quote }}
+            {{- end }}
             - name: Redis__KeyPrefix
               value: {{ .Values.env.redisKeyPrefix | quote }}
             - name: RabbitMQ__Host

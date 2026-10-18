@@ -25,6 +25,8 @@ env:
   aspnetEnvironment: Production
   keycloakAuthority: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
   keycloakAudience: compareshop-admin-ui
+  bootstrapSuperAdminSubjects:
+    - 5577d25e-4cec-4d2e-9faf-da3338dcd515
   corsOrigins:
     - https://compareshop-dev.giamha.online
     - https://admin-compareshop-dev.giamha.online
