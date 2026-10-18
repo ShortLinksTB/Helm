@@ -33,5 +33,6 @@ env:
   redisKeyPrefix: "compareshop:"
   rabbitMqHost: rabbitmq.shortlink-infra-dev.svc.cluster.local
   rabbitMqQueuePrefix: compareshop.
+  affiliateRedirectTrustedProxies: []
 
 resources: {}
