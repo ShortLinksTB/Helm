@@ -39,5 +39,6 @@ env:
     - 10.42.0.225
 
 workers:
+  enabled: false
   image:
     tag: dev
