@@ -37,3 +37,7 @@ env:
   affiliateRedirectTrustedProxies:
     # Exact cloudflared pod IP observed on the public route (argocd namespace).
     - 10.42.0.225
+
+workers:
+  image:
+    tag: dev

@@ -1,0 +1,72 @@
+{{- if .Values.workers.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "compareshop-api.fullname" . }}-workers
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "compareshop-api.fullname" . }}-workers
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: workers
+spec:
+  replicas: {{ .Values.workers.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "compareshop-api.name" . }}-workers
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "compareshop-api.name" . }}-workers
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: workers
+    spec:
+      serviceAccountName: {{ include "compareshop-api.fullname" . }}-workers
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: workers
+          image: "{{ .Values.workers.image.repository }}:{{ .Values.workers.image.tag }}"
+          imagePullPolicy: {{ .Values.workers.image.pullPolicy }}
+          env:
+            - name: ConnectionStrings__CompareShopDb
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.workers.database.secretName | quote }}
+                  key: {{ .Values.workers.database.secretKey | quote }}
+            - name: PLAYWRIGHT_BROWSERS_PATH
+              value: /ms-playwright
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            {{- toYaml .Values.workers.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/app
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 512Mi
+        - name: home
+          emptyDir:
+            sizeLimit: 64Mi
+{{- end }}
