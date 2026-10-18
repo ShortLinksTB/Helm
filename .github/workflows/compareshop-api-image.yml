@@ -19,7 +19,9 @@ jobs:
       - name: Update dev image tag
         env:
           TAG: ${{ github.event.client_payload.tag }}
-        run: sed -i -E "s/^  tag: .*/  tag: ${TAG}/" charts/compareshop-api/values-dev.yaml
+        run: |
+          sed -i -E "/^image:/,/^[^ ]/ s/^  tag: .*/  tag: ${TAG}/" charts/compareshop-api/values-dev.yaml
+          sed -i -E "/^workers:/,/^[^ ]/ s/^    tag: .*/    tag: ${TAG}/" charts/compareshop-api/values-dev.yaml
 
       - name: Commit image update
         env:

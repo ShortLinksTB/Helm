@@ -36,3 +36,23 @@ env:
   affiliateRedirectTrustedProxies: []
 
 resources: {}
+
+workers:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/shortlinkstb/compareshop-api-workers
+    tag: dev
+    pullPolicy: IfNotPresent
+  database:
+    secretName: compareshop-api-runtime
+    secretKey: connection-string
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+      ephemeral-storage: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+      ephemeral-storage: 1Gi
