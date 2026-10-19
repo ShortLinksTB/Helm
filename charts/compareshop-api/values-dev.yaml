@@ -42,3 +42,6 @@ workers:
   enabled: true
   image:
     tag: 5349fe793c02b5381894a8114736c9d3efca19b5
+  extraEnv:
+    - name: Logging__LogLevel__CompareShopAPI.Workers.Ingestion.BhxPlaywrightCatalogReader
+      value: Debug
