@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/shortlinkstb/compare-shop-ui
-  tag: "a2381ba87f56836120b6415559ea974480c17d5b"
+  tag: "a3be53a8013a4db56bb63c6adb08375ffba84723"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
