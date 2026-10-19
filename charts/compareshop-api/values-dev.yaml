@@ -40,5 +40,8 @@ env:
 
 workers:
   enabled: true
+  extraEnv:
+    - name: Ingestion__PollIntervalMinutes
+      value: "5"
   image:
     tag: 5349fe793c02b5381894a8114736c9d3efca19b5

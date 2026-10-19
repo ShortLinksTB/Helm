@@ -49,6 +49,9 @@ spec:
                   key: {{ .Values.workers.database.secretKey | quote }}
             - name: PLAYWRIGHT_BROWSERS_PATH
               value: /ms-playwright
+            {{ with .Values.workers.extraEnv }}
+{{ toYaml . | indent 12 }}
+            {{ end }}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
