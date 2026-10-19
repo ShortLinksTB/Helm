@@ -55,6 +55,7 @@ workers:
   database:
     secretName: compareshop-api-runtime
     secretKey: connection-string
+  extraEnv: []
   resources:
     requests:
       cpu: 100m
