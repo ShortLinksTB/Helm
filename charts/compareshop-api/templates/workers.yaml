@@ -49,6 +49,10 @@ spec:
                   key: {{ .Values.workers.database.secretKey | quote }}
             - name: PLAYWRIGHT_BROWSERS_PATH
               value: /ms-playwright
+            - name: RabbitMQ__Host
+              value: {{ .Values.env.rabbitMqHost | quote }}
+            - name: RabbitMQ__QueuePrefix
+              value: {{ .Values.env.rabbitMqQueuePrefix | quote }}
             {{- with .Values.workers.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
