@@ -53,6 +53,18 @@ spec:
               value: {{ .Values.env.rabbitMqHost | quote }}
             - name: RabbitMQ__QueuePrefix
               value: {{ .Values.env.rabbitMqQueuePrefix | quote }}
+            {{- with .Values.env.rabbitMqCredentialsSecretName }}
+            - name: RabbitMQ__Username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ . | quote }}
+                  key: username
+            - name: RabbitMQ__Password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ . | quote }}
+                  key: password
+            {{- end }}
             {{- with .Values.workers.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
