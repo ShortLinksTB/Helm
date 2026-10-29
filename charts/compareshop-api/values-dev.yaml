@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/shortlinkstb/compareshop-api
-  tag: 96ce5981051cd11c92162327de065ac6cee7272d
+  tag: 7cb059a635cf4a1896244381006895e3386e0d3d
   pullPolicy: IfNotPresent
 
 service:
@@ -47,4 +47,4 @@ workers:
     - name: Logging__LogLevel__CompareShopAPI.Workers.Ingestion.BhxPlaywrightCatalogReader
       value: Debug
   image:
-    tag: 96ce5981051cd11c92162327de065ac6cee7272d
+    tag: 7cb059a635cf4a1896244381006895e3386e0d3d
