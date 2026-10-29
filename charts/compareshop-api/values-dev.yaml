@@ -47,4 +47,4 @@ workers:
     - name: Logging__LogLevel__CompareShopAPI.Workers.Ingestion.BhxPlaywrightCatalogReader
       value: Debug
   image:
-    tag: 82f1aeb4b8d2f1c22b7c5ecc3eb18c989ba133ec
+    tag: f3603233b5d59b9df077e05db30b11c901aa7960
