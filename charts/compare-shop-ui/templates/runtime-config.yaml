@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-runtime
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  config.js: |
+    window.__APP_CONFIG__ = {
+      KEYCLOAK_URL: {{ .Values.runtimeConfig.keycloakUrl | quote }},
+      KEYCLOAK_REALM: {{ .Values.runtimeConfig.keycloakRealm | quote }},
+      KEYCLOAK_CLIENT_ID: {{ .Values.runtimeConfig.keycloakClientId | quote }}
+    };

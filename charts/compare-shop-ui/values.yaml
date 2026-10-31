@@ -19,6 +19,11 @@ ingress:
   path: /
   pathType: Prefix
 
+runtimeConfig:
+  keycloakUrl: ""
+  keycloakRealm: ""
+  keycloakClientId: ""
+
 resources:
   requests:
     cpu: 10m
