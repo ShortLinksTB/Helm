@@ -48,21 +48,6 @@ redisExporter:
       cpu: 100m
       memory: 128Mi
 
-rabbitmq:
-  image: rabbitmq:3.13.7-management
-  # Keep the stateful service reachable only through the homelab Tailscale IP.
-  # This is intentionally not a NodePort/LoadBalancer exposure.
-  externalIPs:
-    - 100.112.108.113
-  storage: 5Gi
-  resources:
-    requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
-      cpu: "1"
-      memory: 1Gi
-
 prometheus:
   image: prom/prometheus:v3.5.0
   storage: 5Gi
