@@ -5,6 +5,10 @@ metadata:
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: minio
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: Prune=false
+    helm.sh/resource-policy: keep
 spec:
   type: ClusterIP
   selector:
@@ -24,6 +28,10 @@ metadata:
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: minio
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: Prune=false
+    helm.sh/resource-policy: keep
 spec:
   serviceName: minio
   replicas: 1
