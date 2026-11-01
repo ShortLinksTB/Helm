@@ -90,28 +90,6 @@ keycloak:
       cpu: "1"
       memory: 2Gi
 
-sonarqube:
-  image: sonarqube:25.4.0.105899-community
-  storage: 10Gi
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1.5Gi
-    limits:
-      cpu: "2"
-      memory: 3Gi
-
-sonarqubePostgresql:
-  image: postgres:15.12-alpine
-  storage: 5Gi
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-
 grafana:
   image: grafana/grafana:11.6.0
   storage: 5Gi
