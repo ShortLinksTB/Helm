@@ -4,6 +4,8 @@ metadata:
   name: rabbitmq
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: rabbitmq
@@ -30,6 +32,8 @@ metadata:
   name: rabbitmq-enabled-plugins
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: rabbitmq
@@ -42,6 +46,8 @@ metadata:
   name: rabbitmq
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: Prune=false
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: rabbitmq
