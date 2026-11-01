@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq
+  annotations:
+    helm.sh/resource-policy: keep
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: rabbitmq
@@ -26,6 +28,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: rabbitmq-enabled-plugins
+  annotations:
+    helm.sh/resource-policy: keep
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: rabbitmq
@@ -36,6 +40,8 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: rabbitmq
+  annotations:
+    helm.sh/resource-policy: keep
   labels:
     {{- include "shortlink-infra-dev.labels" . | nindent 4 }}
     app.kubernetes.io/name: rabbitmq
