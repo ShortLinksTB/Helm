@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/shortlinkstb/admin-compare-shop-ui
   # Override with the published application commit SHA before deployment.
-  tag: "44a694550c72692b9f21348e30394847e40351ef"
+  tag: "latest"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
