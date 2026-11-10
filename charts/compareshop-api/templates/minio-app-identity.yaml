@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "compareshop-api.labels" . | nindent 4 }}
   annotations:
-    argocd.argoproj.io/sync-wave: "-10"
+    argocd.argoproj.io/sync-wave: "-2"
 automountServiceAccountToken: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -16,7 +16,7 @@ metadata:
   labels:
     {{- include "compareshop-api.labels" . | nindent 4 }}
   annotations:
-    argocd.argoproj.io/sync-wave: "-10"
+    argocd.argoproj.io/sync-wave: "-2"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -30,7 +30,7 @@ metadata:
   labels:
     {{- include "compareshop-api.labels" . | nindent 4 }}
   annotations:
-    argocd.argoproj.io/sync-wave: "-10"
+    argocd.argoproj.io/sync-wave: "-2"
 subjects:
   - kind: ServiceAccount
     name: {{ $name }}-minio-provisioner
@@ -47,35 +47,9 @@ metadata:
   labels:
     {{- include "compareshop-api.labels" . | nindent 4 }}
   annotations:
-    argocd.argoproj.io/sync-wave: "-10"
+    argocd.argoproj.io/sync-wave: "-2"
 type: Opaque
 data: {}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ $name }}-minio-app-policy
-  labels:
-    {{- include "compareshop-api.labels" . | nindent 4 }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "-10"
-data:
-  policy.json: |
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::{{ .Values.env.minioBucket }}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
-          "Resource": ["arn:aws:s3:::{{ .Values.env.minioBucket }}/*"]
-        }
-      ]
-    }
 ---
 apiVersion: batch/v1
 kind: Job
@@ -85,7 +59,7 @@ metadata:
     {{- include "compareshop-api.labels" . | nindent 4 }}
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/sync-wave: "-1"
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
 spec:
   backoffLimit: 3
@@ -101,62 +75,152 @@ spec:
         runAsNonRoot: true
         runAsUser: 10001
         runAsGroup: 10001
+        fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
       initContainers:
-        - name: stage-mc
-          image: quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z
-          command: ["/bin/sh", "-c"]
-          args: ["cp \"$(command -v mc)\" /tools/mc && chmod 0555 /tools/mc"]
+        - name: install-minio-sdk
+          image: python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+          imagePullPolicy: IfNotPresent
+          command:
+            - python
+            - -m
+            - pip
+            - install
+            - --disable-pip-version-check
+            - --no-cache-dir
+            - --target=/sdk
+            - minio==7.2.20
           volumeMounts:
-            - name: tools
-              mountPath: /tools
+            - name: sdk
+              mountPath: /sdk
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
       containers:
         - name: provision-identity
-          image: alpine/k8s:1.37.2
+          image: python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
           imagePullPolicy: IfNotPresent
-          command: ["/bin/sh", "-c"]
+          command: ["python", "-c"]
           args:
             - |
-              set -eu
-              APP_SECRET="{{ .Values.env.minioAppCredentialsSecretName }}"
-              APP_ACCESS_B64="$(kubectl get secret "$APP_SECRET" -o jsonpath='{.data.access-key}')"
-              APP_SECRET_B64="$(kubectl get secret "$APP_SECRET" -o jsonpath='{.data.secret-key}')"
-              APP_ACCESS_KEY=""
-              APP_SECRET_KEY=""
-              if [ -n "$APP_ACCESS_B64" ]; then
-                APP_ACCESS_KEY="$(printf '%s' "$APP_ACCESS_B64" | base64 -d)"
-              fi
-              if [ -n "$APP_SECRET_B64" ]; then
-                APP_SECRET_KEY="$(printf '%s' "$APP_SECRET_B64" | base64 -d)"
-              fi
-              if [ -z "$APP_ACCESS_KEY" ] || [ -z "$APP_SECRET_KEY" ]; then
-                APP_ACCESS_KEY="cs$(head -c 9 /dev/urandom | od -An -tx1 | tr -d ' \n')"
-                APP_SECRET_KEY="$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
-                APP_ACCESS_B64="$(printf '%s' "$APP_ACCESS_KEY" | base64 | tr -d '\n')"
-                APP_SECRET_B64="$(printf '%s' "$APP_SECRET_KEY" | base64 | tr -d '\n')"
-                kubectl patch secret "$APP_SECRET" --type=merge --patch-file=/dev/stdin >/dev/null <<EOF_PATCH
-              {"data":{"access-key":"$APP_ACCESS_B64","secret-key":"$APP_SECRET_B64"}}
-              EOF_PATCH
-              fi
+              import base64
+              import json
+              import os
+              import secrets
+              import ssl
+              import sys
+              from urllib.request import Request, urlopen
 
-              mkdir -p "$MC_CONFIG_DIR"
-              export MC_HOST_minio="http://$MINIO_ROOT_USER:$MINIO_ROOT_PASSWORD@{{ trimPrefix "http://" .Values.env.minioEndpoint }}"
-              if ! /tools/mc admin policy info minio compareshop-files-app >/dev/null 2>&1; then
-                /tools/mc admin policy create minio compareshop-files-app /policy/policy.json >/dev/null
-              fi
-              if /tools/mc admin user info minio "$APP_ACCESS_KEY" >/dev/null 2>&1; then
-                /tools/mc admin user enable minio "$APP_ACCESS_KEY" >/dev/null
-              else
-                /tools/mc admin user add minio "$APP_ACCESS_KEY" "$APP_SECRET_KEY" >/dev/null
-              fi
-              /tools/mc admin policy attach minio compareshop-files-app --user "$APP_ACCESS_KEY" >/dev/null
-              printf '%s\n' 'Dedicated bucket identity reconciled; credential values suppressed.'
+              try:
+                  from minio import MinioAdmin
+                  from minio.credentials import StaticProvider
+              except Exception:
+                  print("MinIO SDK unavailable; details redacted.", file=sys.stderr)
+                  raise SystemExit(1)
+
+              APP_ACCESS_KEY = os.environ["APP_ACCESS_KEY"]
+              APP_SECRET_NAME = os.environ["APP_SECRET_NAME"]
+              POLICY_NAME = "compareshop-files-app"
+              POLICY = {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Action": ["s3:ListBucket"],
+                          "Resource": ["arn:aws:s3:::compareshop-files"],
+                      },
+                      {
+                          "Effect": "Allow",
+                          "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+                          "Resource": ["arn:aws:s3:::compareshop-files/*"],
+                      },
+                  ],
+              }
+
+              def kubernetes_request(method, payload=None):
+                  token_path = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                  ca_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                  namespace_path = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+                  with open(token_path, encoding="utf-8") as token_file:
+                      token = token_file.read().strip()
+                  with open(namespace_path, encoding="utf-8") as namespace_file:
+                      namespace = namespace_file.read().strip()
+                  host = os.environ["KUBERNETES_SERVICE_HOST"]
+                  port = os.environ["KUBERNETES_SERVICE_PORT_HTTPS"]
+                  url = (
+                      f"https://{host}:{port}/api/v1/namespaces/{namespace}"
+                      f"/secrets/{APP_SECRET_NAME}"
+                  )
+                  headers = {"Authorization": f"Bearer {token}"}
+                  data = None
+                  if payload is not None:
+                      headers["Content-Type"] = "application/merge-patch+json"
+                      data = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+                  request = Request(url, data=data, headers=headers, method=method)
+                  context = ssl.create_default_context(cafile=ca_path)
+                  with urlopen(request, context=context, timeout=15) as response:
+                      return json.loads(response.read())
+
+              def main():
+                  secret_object = kubernetes_request("GET")
+                  encoded = secret_object.get("data") or {}
+                  access_key = base64.b64decode(encoded.get("access-key", "")).decode("utf-8")
+                  app_secret_key = base64.b64decode(encoded.get("secret-key", "")).decode("utf-8")
+                  if bool(access_key) != bool(app_secret_key):
+                      raise RuntimeError("app Secret has only one credential key")
+                  if access_key and access_key != APP_ACCESS_KEY:
+                      raise RuntimeError("app Secret access key does not match the fixed identity")
+                  if not access_key:
+                      app_secret_key = secrets.token_hex(20)
+
+                  endpoint = os.environ["MINIO_ENDPOINT"]
+                  secure = endpoint.startswith("https://")
+                  endpoint = endpoint.removeprefix("https://").removeprefix("http://")
+                  admin = MinioAdmin(
+                      endpoint=endpoint,
+                      credentials=StaticProvider(
+                          os.environ["MINIO_ROOT_USER"],
+                          os.environ["MINIO_ROOT_PASSWORD"],
+                      ),
+                      secure=secure,
+                  )
+                  admin.policy_add(POLICY_NAME, policy=POLICY)
+                  admin.user_add(APP_ACCESS_KEY, app_secret_key)
+                  admin.policy_set(POLICY_NAME, user=APP_ACCESS_KEY)
+
+                  if not access_key:
+                      kubernetes_request(
+                          "PATCH",
+                          {
+                              "data": {
+                                  "access-key": base64.b64encode(APP_ACCESS_KEY.encode()).decode(),
+                                  "secret-key": base64.b64encode(app_secret_key.encode()).decode(),
+                              }
+                          },
+                      )
+                  print("Dedicated MinIO identity reconciled; credential values suppressed.")
+
+              try:
+                  main()
+              except Exception:
+                  print("Provisioning failed; sensitive details redacted.", file=sys.stderr)
+                  raise SystemExit(1)
           env:
-            - name: HOME
-              value: /tmp
-            - name: MC_CONFIG_DIR
-              value: /tmp/mc
+            - name: PYTHONPATH
+              value: /sdk
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: APP_ACCESS_KEY
+              value: "compareshop-files"
+            - name: APP_SECRET_NAME
+              value: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+            - name: MINIO_ENDPOINT
+              value: {{ .Values.env.minioEndpoint | quote }}
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
@@ -168,25 +232,17 @@ spec:
                   name: {{ .Values.env.minioAdminCredentialsSecretName | quote }}
                   key: {{ .Values.env.minioSecretKeySecretKey | quote }}
           volumeMounts:
-            - name: tools
-              mountPath: /tools
+            - name: sdk
+              mountPath: /sdk
               readOnly: true
-            - name: policy
-              mountPath: /policy
-              readOnly: true
-            - name: tmp
-              mountPath: /tmp
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
       volumes:
-        - name: tools
+        - name: sdk
           emptyDir: {}
-        - name: policy
-          configMap:
-            name: {{ $name }}-minio-app-policy
         - name: tmp
           emptyDir:
-            sizeLimit: 16Mi
+            sizeLimit: 32Mi
