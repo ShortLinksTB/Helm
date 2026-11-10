@@ -148,11 +148,13 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - >-
-              python -m pip install --disable-pip-version-check --no-cache-dir --quiet -r /config/requirements.txt
+              python -m pip install --disable-pip-version-check --no-cache-dir --quiet --target=/tmp/python -r /config/requirements.txt
               && exec python /config/provision.py
           env:
             - name: PIP_CACHE_DIR
               value: /tmp/pip-cache
+            - name: PYTHONPATH
+              value: /tmp/python
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
@@ -180,4 +182,4 @@ spec:
             name: {{ $name }}-minio-provisioner
         - name: tmp
           emptyDir:
-            sizeLimit: 64Mi
+            sizeLimit: 256Mi
