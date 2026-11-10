@@ -23,7 +23,8 @@ spec:
             - >-
               mc alias set minio {{ .Values.env.minioEndpoint | quote }}
               "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" &&
-              mc mb --ignore-existing minio/{{ .Values.env.minioBucket }}
+              mc mb --ignore-existing minio/{{ .Values.env.minioBucket }} &&
+              mc anonymous set download minio/{{ .Values.env.minioBucket }}
           env:
             - name: MINIO_ROOT_USER
               valueFrom:
