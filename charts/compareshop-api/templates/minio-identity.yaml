@@ -1,0 +1,180 @@
+{{- if .Values.env.minioIdentityProvisioning.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+type: Opaque
+data:
+  {{ .Values.env.minioAppAccessKeySecretKey }}: ""
+  {{ .Values.env.minioAppSecretKeySecretKey }}: ""
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "compareshop-api.fullname" . }}-minio-identity
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "compareshop-api.fullname" . }}-minio-identity
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: [{{ .Values.env.minioAppCredentialsSecretName | quote }}]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "compareshop-api.fullname" . }}-minio-identity
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "compareshop-api.fullname" . }}-minio-identity
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "compareshop-api.fullname" . }}-minio-identity
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "compareshop-api.fullname" . }}-minio-identity
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded,HookFailed
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        {{- include "compareshop-api.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "compareshop-api.fullname" . }}-minio-identity
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      volumes:
+        - name: handoff
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
+        - name: kubernetes-api-access
+          projected:
+            sources:
+              - serviceAccountToken:
+                  expirationSeconds: 3600
+                  path: token
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        apiVersion: v1
+                        fieldPath: metadata.namespace
+      initContainers:
+        - name: provision-minio-user
+          image: {{ .Values.env.minioIdentityProvisioning.jobImage | quote }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -eu
+              urlencode() {
+                local input="$1" output="" character hex index
+                for ((index = 0; index < ${#input}; index++)); do
+                  character="${input:index:1}"
+                  case "$character" in
+                    [a-zA-Z0-9.~_-]) output+="$character" ;;
+                    *) printf -v hex '%%%02X' "'${character}"; output+="$hex" ;;
+                  esac
+                done
+                printf '%s' "$output"
+              }
+              minio_host="${MINIO_ENDPOINT#http://}"
+              export MC_HOST_minio="http://$(urlencode "$MINIO_ROOT_USER"):$(urlencode "$MINIO_ROOT_PASSWORD")@${minio_host}"
+              if [ -n "$APP_ACCESS_KEY" ] && [ -n "$APP_SECRET_KEY" ]; then
+                access_key="$APP_ACCESS_KEY"
+                secret_key="$APP_SECRET_KEY"
+              elif [ -z "$APP_ACCESS_KEY" ] && [ -z "$APP_SECRET_KEY" ]; then
+                access_key="cs$(head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 18)"
+                secret_key="$(head -c 64 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 48)"
+              else
+                echo "app credential Secret contains only one key; refusing unsafe rotation"
+                exit 1
+              fi
+              printf '%s\n' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:ListBucket"],"Resource":["arn:aws:s3:::{{ .Values.env.minioBucket }}"]},{"Effect":"Allow","Action":["s3:GetObject","s3:PutObject","s3:DeleteObject"],"Resource":["arn:aws:s3:::{{ .Values.env.minioBucket }}/*"]}]}' > /tmp/compareshop-files-policy.json
+              mc admin policy info minio compareshop-files-app-policy >/dev/null 2>&1 || mc admin policy create minio compareshop-files-app-policy /tmp/compareshop-files-policy.json >/dev/null 2>&1 || { echo "MinIO policy setup failed"; exit 1; }
+              mc admin user add minio "$access_key" "$secret_key" >/dev/null 2>&1 || { echo "MinIO user setup failed"; exit 1; }
+              mc admin policy attach minio compareshop-files-app-policy --user "$access_key" >/dev/null 2>&1 || { echo "MinIO policy attachment failed"; exit 1; }
+              access_b64="$(printf '%s' "$access_key" | base64 -w0)"
+              secret_b64="$(printf '%s' "$secret_key" | base64 -w0)"
+              printf '{"data":{"{{ .Values.env.minioAppAccessKeySecretKey }}":"%s","{{ .Values.env.minioAppSecretKeySecretKey }}":"%s"}}' "$access_b64" "$secret_b64" > /handoff/secret-patch.json
+          env:
+            - name: MINIO_ENDPOINT
+              value: {{ .Values.env.minioEndpoint | quote }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAdminCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAdminAccessKeySecretKey | quote }}
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAdminCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAdminSecretKeySecretKey | quote }}
+            - name: APP_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAppAccessKeySecretKey | quote }}
+            - name: APP_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAppSecretKeySecretKey | quote }}
+          volumeMounts:
+            - name: handoff
+              mountPath: /handoff
+              readOnly: false
+      containers:
+        - name: write-app-secret
+          image: {{ .Values.env.minioIdentityProvisioning.kubectlImage | quote }}
+          args:
+            - patch
+            - secret
+            - {{ .Values.env.minioAppCredentialsSecretName | quote }}
+            - --namespace={{ .Release.Namespace }}
+            - --type=merge
+            - --patch-file=/handoff/secret-patch.json
+          volumeMounts:
+            - name: handoff
+              mountPath: /handoff
+              readOnly: true
+            - name: kubernetes-api-access
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+{{- end }}

@@ -31,9 +31,19 @@ env:
   minioEndpoint: http://minio.shortlink-infra-dev.svc.cluster.local:9000
   minioBucket: compareshop-files
   minioUseSsl: false
-  minioCredentialsSecretName: compareshop-minio-credentials
-  minioAccessKeySecretKey: access-key
-  minioSecretKeySecretKey: secret-key
+  minioAdminCredentialsSecretName: compareshop-minio-credentials
+  minioAdminAccessKeySecretKey: access-key
+  minioAdminSecretKeySecretKey: secret-key
+  minioBucketInitCredentialsSecretName: compareshop-minio-credentials
+  minioBucketInitAccessKeySecretKey: access-key
+  minioBucketInitSecretKeySecretKey: secret-key
+  minioAppCredentialsSecretName: compareshop-files-app-credentials
+  minioAppAccessKeySecretKey: access-key
+  minioAppSecretKeySecretKey: secret-key
+  minioIdentityProvisioning:
+    enabled: false
+    jobImage: quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z
+    kubectlImage: rancher/kubectl:v1.32.3
   corsOrigins: []
   otlpEndpoint: http://tempo.shortlink-infra-dev.svc.cluster.local:4317
   redisKeyPrefix: "compareshop:"

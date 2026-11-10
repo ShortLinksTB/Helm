@@ -14,6 +14,10 @@ metadata:
   labels:
     {{- include "compareshop-api.labels" . | nindent 4 }}
     app.kubernetes.io/component: workers
+  {{- if .Values.env.minioIdentityProvisioning.enabled }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   replicas: {{ .Values.workers.replicaCount }}
   selector:
@@ -49,6 +53,26 @@ spec:
                   key: {{ .Values.workers.database.secretKey | quote }}
             - name: PLAYWRIGHT_BROWSERS_PATH
               value: /ms-playwright
+            - name: Minio__Endpoint
+              value: {{ .Values.env.minioEndpoint | quote }}
+            - name: Minio__Bucket
+              value: {{ .Values.env.minioBucket | quote }}
+            - name: Minio__UseSsl
+              value: {{ .Values.env.minioUseSsl | quote }}
+            - name: Minio__PublicEndpoint
+              value: {{ .Values.env.minioPublicEndpoint | quote }}
+            - name: Minio__PublicUseSsl
+              value: {{ .Values.env.minioPublicUseSsl | quote }}
+            - name: Minio__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAppAccessKeySecretKey | quote }}
+            - name: Minio__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAppSecretKeySecretKey | quote }}
             - name: RabbitMQ__Host
               value: {{ .Values.env.rabbitMqHost | quote }}
             - name: RabbitMQ__QueuePrefix

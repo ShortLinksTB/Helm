@@ -4,6 +4,10 @@ metadata:
   name: {{ include "compareshop-api.fullname" . }}
   labels:
     {{- include "compareshop-api.labels" . | nindent 4 }}
+  {{- if .Values.env.minioIdentityProvisioning.enabled }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -68,13 +72,13 @@ spec:
             - name: Minio__AccessKey
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.env.minioCredentialsSecretName | quote }}
-                  key: {{ .Values.env.minioAccessKeySecretKey | quote }}
+                  name: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAppAccessKeySecretKey | quote }}
             - name: Minio__SecretKey
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.env.minioCredentialsSecretName | quote }}
-                  key: {{ .Values.env.minioSecretKeySecretKey | quote }}
+                  name: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAppSecretKeySecretKey | quote }}
             {{- range $index, $subject := .Values.env.bootstrapSuperAdminSubjects }}
             - name: Admin__BootstrapSuperAdminSubjects__{{ $index }}
               value: {{ $subject | quote }}

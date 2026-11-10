@@ -31,10 +31,10 @@ spec:
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.env.minioCredentialsSecretName | quote }}
-                  key: {{ .Values.env.minioAccessKeySecretKey | quote }}
+                  name: {{ .Values.env.minioBucketInitCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioBucketInitAccessKeySecretKey | quote }}
             - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.env.minioCredentialsSecretName | quote }}
-                  key: {{ .Values.env.minioSecretKeySecretKey | quote }}
+                  name: {{ .Values.env.minioBucketInitCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioBucketInitSecretKeySecretKey | quote }}
