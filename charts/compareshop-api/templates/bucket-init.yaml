@@ -24,7 +24,8 @@ spec:
               mc alias set minio {{ .Values.env.minioEndpoint | quote }}
               "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" &&
               mc mb --ignore-existing minio/{{ .Values.env.minioBucket }} &&
-              mc anonymous set download minio/{{ .Values.env.minioBucket }} &&
+              printf '%s\n' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::{{ .Values.env.minioBucket }}/*"]}]}' > /tmp/anonymous-readonly.json &&
+              mc anonymous set-json /tmp/anonymous-readonly.json minio/{{ .Values.env.minioBucket }} &&
               mc anonymous get minio/{{ .Values.env.minioBucket }}
           env:
             - name: MINIO_ROOT_USER
