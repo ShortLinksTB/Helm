@@ -1,0 +1,192 @@
+{{- $name := include "compareshop-api.fullname" . -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}-minio-provisioner
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}-minio-provisioner
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["{{ .Values.env.minioAppCredentialsSecretName }}"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}-minio-provisioner
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}-minio-provisioner
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}-minio-provisioner
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.env.minioAppCredentialsSecretName }}
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+type: Opaque
+data: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-minio-app-policy
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+data:
+  policy.json: |
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": ["s3:ListBucket"],
+          "Resource": ["arn:aws:s3:::{{ .Values.env.minioBucket }}"]
+        },
+        {
+          "Effect": "Allow",
+          "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+          "Resource": ["arn:aws:s3:::{{ .Values.env.minioBucket }}/*"]
+        }
+      ]
+    }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}-minio-app-identity
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "compareshop-api.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $name }}-minio-provisioner
+      automountServiceAccountToken: true
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: stage-mc
+          image: quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z
+          command: ["/bin/sh", "-c"]
+          args: ["cp \"$(command -v mc)\" /tools/mc && chmod 0555 /tools/mc"]
+          volumeMounts:
+            - name: tools
+              mountPath: /tools
+      containers:
+        - name: provision-identity
+          image: alpine/k8s:1.37.2
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              APP_SECRET="{{ .Values.env.minioAppCredentialsSecretName }}"
+              APP_ACCESS_B64="$(kubectl get secret "$APP_SECRET" -o jsonpath='{.data.access-key}')"
+              APP_SECRET_B64="$(kubectl get secret "$APP_SECRET" -o jsonpath='{.data.secret-key}')"
+              APP_ACCESS_KEY=""
+              APP_SECRET_KEY=""
+              if [ -n "$APP_ACCESS_B64" ]; then
+                APP_ACCESS_KEY="$(printf '%s' "$APP_ACCESS_B64" | base64 -d)"
+              fi
+              if [ -n "$APP_SECRET_B64" ]; then
+                APP_SECRET_KEY="$(printf '%s' "$APP_SECRET_B64" | base64 -d)"
+              fi
+              if [ -z "$APP_ACCESS_KEY" ] || [ -z "$APP_SECRET_KEY" ]; then
+                APP_ACCESS_KEY="cs$(head -c 9 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+                APP_SECRET_KEY="$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+                APP_ACCESS_B64="$(printf '%s' "$APP_ACCESS_KEY" | base64 | tr -d '\n')"
+                APP_SECRET_B64="$(printf '%s' "$APP_SECRET_KEY" | base64 | tr -d '\n')"
+                kubectl patch secret "$APP_SECRET" --type=merge --patch-file=/dev/stdin >/dev/null <<EOF_PATCH
+              {"data":{"access-key":"$APP_ACCESS_B64","secret-key":"$APP_SECRET_B64"}}
+              EOF_PATCH
+              fi
+
+              mkdir -p "$MC_CONFIG_DIR"
+              export MC_HOST_minio="http://$MINIO_ROOT_USER:$MINIO_ROOT_PASSWORD@{{ trimPrefix "http://" .Values.env.minioEndpoint }}"
+              if ! /tools/mc admin policy info minio compareshop-files-app >/dev/null 2>&1; then
+                /tools/mc admin policy create minio compareshop-files-app /policy/policy.json >/dev/null
+              fi
+              if /tools/mc admin user info minio "$APP_ACCESS_KEY" >/dev/null 2>&1; then
+                /tools/mc admin user enable minio "$APP_ACCESS_KEY" >/dev/null
+              else
+                /tools/mc admin user add minio "$APP_ACCESS_KEY" "$APP_SECRET_KEY" >/dev/null
+              fi
+              /tools/mc admin policy attach minio compareshop-files-app --user "$APP_ACCESS_KEY" >/dev/null
+              printf '%s\n' 'Dedicated bucket identity reconciled; credential values suppressed.'
+          env:
+            - name: HOME
+              value: /tmp
+            - name: MC_CONFIG_DIR
+              value: /tmp/mc
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAdminCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAccessKeySecretKey | quote }}
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAdminCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioSecretKeySecretKey | quote }}
+          volumeMounts:
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: policy
+              mountPath: /policy
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: tools
+          emptyDir: {}
+        - name: policy
+          configMap:
+            name: {{ $name }}-minio-app-policy
+        - name: tmp
+          emptyDir:
+            sizeLimit: 16Mi

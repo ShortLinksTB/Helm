@@ -53,6 +53,22 @@ spec:
               value: {{ .Values.env.rabbitMqHost | quote }}
             - name: RabbitMQ__QueuePrefix
               value: {{ .Values.env.rabbitMqQueuePrefix | quote }}
+            - name: Minio__Endpoint
+              value: {{ .Values.env.minioEndpoint | quote }}
+            - name: Minio__Bucket
+              value: {{ .Values.env.minioBucket | quote }}
+            - name: Minio__UseSsl
+              value: {{ .Values.env.minioUseSsl | quote }}
+            - name: Minio__AccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAccessKeySecretKey | quote }}
+            - name: Minio__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioSecretKeySecretKey | quote }}
             {{- with .Values.env.rabbitMqCredentialsSecretName }}
             - name: RabbitMQ__Username
               valueFrom:

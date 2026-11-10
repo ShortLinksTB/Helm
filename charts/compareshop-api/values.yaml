@@ -31,7 +31,9 @@ env:
   minioEndpoint: http://minio.shortlink-infra-dev.svc.cluster.local:9000
   minioBucket: compareshop-files
   minioUseSsl: false
-  minioCredentialsSecretName: compareshop-minio-credentials
+  minioCredentialsSecretName: compareshop-files-app-credentials
+  minioAdminCredentialsSecretName: compareshop-minio-credentials
+  minioAppCredentialsSecretName: compareshop-files-app-credentials
   minioAccessKeySecretKey: access-key
   minioSecretKeySecretKey: secret-key
   corsOrigins: []
