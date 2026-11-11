@@ -9,3 +9,5 @@ compareShopUI:
   baseUrl: https://compareshop-dev.giamha.online
 outbox:
   enabled: true
+qcRunner:
+  enabled: true
