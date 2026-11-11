@@ -22,6 +22,19 @@ infra:
   redisConnection: redis.shortlink-infra-dev.svc.cluster.local:6379
 
 emailSending:
+  mode: Mock
   sendReal: false
+
+outbox:
+  enabled: false
+  serviceKey:
+    secretName: email-api-outbox-auth
+    secretKey: service-key
+    header: X-EmailAPI-Outbox-Key
+  networkPolicy:
+    readerNamespace: email-api-dev
+    readerPodLabel:
+      key: app.kubernetes.io/name
+      value: email-api-outbox-reader
 
 resources: {}

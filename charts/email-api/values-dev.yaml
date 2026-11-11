@@ -3,4 +3,7 @@ image:
   tag: b50a67f422849a36dd487ca43f5f3c8b59377037
   pullPolicy: Always
 emailSending:
+  mode: Mock
   sendReal: false
+outbox:
+  enabled: true

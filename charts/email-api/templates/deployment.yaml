@@ -26,6 +26,17 @@ spec:
               value: http://+:8080
             - name: EmailSending__SendReal
               value: {{ .Values.emailSending.sendReal | quote }}
+            - name: EmailSending__Mode
+              value: {{ .Values.emailSending.mode | quote }}
+            {{- if .Values.outbox.enabled }}
+            - name: EmailOutbox__ServiceKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.outbox.serviceKey.secretName }}
+                  key: {{ .Values.outbox.serviceKey.secretKey }}
+            - name: EmailOutbox__ServiceKeyHeader
+              value: {{ .Values.outbox.serviceKey.header | quote }}
+            {{- end }}
             - name: ConnectionStrings__EmailAPI
               valueFrom:
                 secretKeyRef:
