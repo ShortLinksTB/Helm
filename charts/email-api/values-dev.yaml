@@ -5,5 +5,7 @@ image:
 emailSending:
   mode: Mock
   sendReal: false
+compareShopUI:
+  baseUrl: https://compareshop-dev.giamha.online
 outbox:
   enabled: true
