@@ -1,0 +1,18 @@
+rabbitmq:
+  image: rabbitmq:3.13.7-management
+  credentialsSecret: shortlink-infra-credentials
+  storage: 5Gi
+  externalIPs:
+    - 100.112.108.113
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+  startupProbe:
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 30
