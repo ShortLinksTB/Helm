@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "compareshop-auth-api.fullname" . }}
+  labels:
+    {{- include "compareshop-auth-api.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "compareshop-auth-api.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "compareshop-auth-api.labels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: compareshop-auth-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{ .Values.env.aspnetEnvironment | quote }}
+            - name: DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE
+              value: "false"
+            - name: ConnectionStrings__CompareShopAuth
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName | quote }}
+                  key: {{ .Values.database.connectionStringKey | quote }}
+            - name: Database__ApplyMigrations
+              value: {{ .Values.database.applyMigrations | quote }}
+            - name: Database__RetryOnFailure
+              value: {{ .Values.env.retryOnFailure | quote }}
+            - name: Jwt__Issuer
+              value: {{ .Values.env.issuer | quote }}
+            - name: Jwt__Audience
+              value: {{ .Values.env.audience | quote }}
+            - name: Jwt__KeyId
+              value: {{ .Values.env.keyId | quote }}
+            - name: Jwt__PrivateKeyFile
+              value: {{ printf "%s/%s" .Values.signing.mountPath .Values.signing.privateKeyKey | quote }}
+            - name: AuthEmailOutbox__EncryptionKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.outbox.secretName | quote }}
+                  key: {{ .Values.outbox.encryptionKey | quote }}
+            - name: OpenTelemetry__ServiceName
+              value: compareshop-auth-api
+            - name: OpenTelemetry__OtlpEndpoint
+              value: {{ .Values.env.otlpEndpoint | quote }}
+            {{- range $index, $origin := .Values.env.corsOrigins }}
+            - name: Cors__AllowedOrigins__{{ $index }}
+              value: {{ $origin | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: signing-key
+              mountPath: {{ .Values.signing.mountPath | quote }}
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: signing-key
+          secret:
+            secretName: {{ .Values.signing.secretName }}
+            items:
+              - key: {{ .Values.signing.privateKeyKey }}
+                path: {{ .Values.signing.privateKeyKey }}
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
