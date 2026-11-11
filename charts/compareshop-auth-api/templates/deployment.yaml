@@ -55,7 +55,7 @@ spec:
               value: {{ .Values.env.audience | quote }}
             - name: Jwt__KeyId
               value: {{ .Values.env.keyId | quote }}
-            - name: Jwt__PrivateKeyFile
+            - name: Jwt__PrivateKeyPath
               value: {{ printf "%s/%s" .Values.signing.mountPath .Values.signing.privateKeyKey | quote }}
             - name: AuthEmailOutbox__EncryptionKey
               valueFrom:
