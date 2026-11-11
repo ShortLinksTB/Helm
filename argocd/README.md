@@ -45,6 +45,13 @@ PVCs.
 chart at `charts/shortlink-infra-dev` from this repository's `main` branch. It is ClusterIP-only;
 it must not be given an Ingress or public DNS entry.
 
+RabbitMQ dev is defined separately at `argocd/apps/dev/rabbitmq-dev.yaml` and renders
+`charts/rabbitmq` into the existing `shortlink-infra-dev` namespace. Its initial adoption keeps
+the live Argo prune/ignore annotations and disables Application pruning; remove those safeguards
+only after the new Application is confirmed to own the existing Service, ConfigMap, and
+StatefulSet. The StatefulSet selector, service name, and `data` volume claim template must remain
+unchanged so the existing `data-rabbitmq-0` PVC is retained.
+
 `headlamp-dev` is defined at `argocd/apps/dev/headlamp.yaml`. It renders the official Headlamp
 chart into the dedicated `headlamp` namespace. Its ServiceAccount `headlamp-manager` is bound to a
 custom `headlamp-manager` ClusterRole (SL-32, owner-approved, gated behind SL-33/Cloudflare Access)
