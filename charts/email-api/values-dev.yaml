@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  tag: b50a67f422849a36dd487ca43f5f3c8b59377037
+  tag: fe9f544478fe997fae8ce280c31783ad74d980e6
   pullPolicy: Always
 emailSending:
   mode: Mock
