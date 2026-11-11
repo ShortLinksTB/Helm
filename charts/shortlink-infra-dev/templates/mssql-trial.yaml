@@ -24,7 +24,7 @@ metadata:
     app.kubernetes.io/name: mssql-trial
 spec:
   serviceName: mssql-trial
-  replicas: 1
+  replicas: {{ .Values.mssqlTrial.replicas }}
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Delete
     whenScaled: Delete
