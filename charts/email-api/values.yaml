@@ -40,4 +40,26 @@ outbox:
       key: app.kubernetes.io/name
       value: email-api-outbox-reader
 
+qcRunner:
+  enabled: false
+  image: curlimages/curl:8.12.1
+  publisherSecret:
+    name: email-api-qc-publisher
+    usernameKey: username
+    passwordKey: password
+  outboxServiceKey:
+    secretName: email-api-outbox-auth
+    secretKey: service-key
+    header: X-EmailAPI-Outbox-Key
+  rabbitMq:
+    host: rabbitmq.shortlink-infra-dev.svc.cluster.local
+    port: 5672
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
 resources: {}
