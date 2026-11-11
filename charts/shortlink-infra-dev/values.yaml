@@ -22,6 +22,20 @@ mssql:
       cpu: "2"
       memory: 4Gi
 
+# Isolated, temporary SQL Server 2025 candidate for DEV fault diagnosis.
+# It has its own StatefulSet and PVC and is not used by application services.
+mssqlTrial:
+  enabled: true
+  image: mcr.microsoft.com/mssql/server:2025-CU7-ubuntu-22.04
+  storage: 10Gi
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+
 redis:
   image: redis:7.4.2-alpine
   # The homelab already has an unrelated Docker redis-sandbox on host port
