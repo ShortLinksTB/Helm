@@ -39,6 +39,23 @@ metadata:
     app.kubernetes.io/part-of: shortlink-infra
 data:
   enabled_plugins: "[rabbitmq_management,rabbitmq_prometheus]."
+{{- if .Values.emailPublisherTopology.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-email-publisher-topology
+  annotations:
+    argocd.argoproj.io/tracking-id: rabbitmq-dev:/ConfigMap:shortlink-infra-dev/rabbitmq-email-publisher-topology
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: shortlink-infra
+data:
+  rabbitmq.conf: |
+    management.load_definitions = /etc/rabbitmq/email-publisher/definitions.json
+  definitions.json: {{ dict "rabbit_version" "3.13.7" "users" (list) "vhosts" (list (dict "name" "/")) "permissions" (list) "topic_permissions" (list) "parameters" (list) "global_parameters" (list) "policies" (list) "queues" (list (dict "name" .Values.emailPublisherTopology.queue "vhost" "/" "durable" true "auto_delete" false "arguments" (dict "x-dead-letter-exchange" .Values.emailPublisherTopology.deadLetterExchange "x-dead-letter-routing-key" .Values.emailPublisherTopology.deadLetterRoutingKey))) "exchanges" (list (dict "name" .Values.emailPublisherTopology.exchange "vhost" "/" "type" "direct" "durable" true "auto_delete" false "internal" false "arguments" (dict))) "bindings" (list (dict "source" .Values.emailPublisherTopology.exchange "vhost" "/" "destination" .Values.emailPublisherTopology.queue "destination_type" "queue" "routing_key" .Values.emailPublisherTopology.queue "arguments" (dict))) | toJson | quote }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -132,10 +149,22 @@ spec:
             - name: enabled-plugins
               mountPath: /etc/rabbitmq/enabled_plugins
               subPath: enabled_plugins
+            {{- if .Values.emailPublisherTopology.enabled }}
+            - name: email-publisher-topology
+              mountPath: /etc/rabbitmq/rabbitmq.conf
+              subPath: rabbitmq.conf
+            - name: email-publisher-topology
+              mountPath: /etc/rabbitmq/email-publisher
+            {{- end }}
       volumes:
         - name: enabled-plugins
           configMap:
             name: rabbitmq-enabled-plugins
+        {{- if .Values.emailPublisherTopology.enabled }}
+        - name: email-publisher-topology
+          configMap:
+            name: rabbitmq-email-publisher-topology
+        {{- end }}
   volumeClaimTemplates:
     - metadata:
         name: data

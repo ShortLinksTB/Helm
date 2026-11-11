@@ -2,6 +2,12 @@ image: rabbitmq:3.13.7-management
 credentialsSecret: shortlink-infra-credentials
 storage: 5Gi
 externalIP: 100.112.108.113
+emailPublisherTopology:
+  enabled: true
+  exchange: email-send-requests-publisher
+  queue: email-send-requests
+  deadLetterExchange: email-send-requests-dlq
+  deadLetterRoutingKey: email-send-requests
 resources:
   requests:
     cpu: 500m

@@ -24,6 +24,12 @@ spec:
           env:
             - name: ASPNETCORE_URLS
               value: http://+:8080
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{ .Values.environment | quote }}
+            - name: DOTNET_ENVIRONMENT
+              value: {{ .Values.environment | quote }}
+            - name: EmailOutbox__Enabled
+              value: {{ .Values.outbox.enabled | quote }}
             - name: EmailSending__SendReal
               value: {{ .Values.emailSending.sendReal | quote }}
             - name: EmailSending__Mode
