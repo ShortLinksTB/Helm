@@ -26,6 +26,7 @@ mssql:
 # It has its own StatefulSet and PVC and is not used by application services.
 mssqlTrial:
   enabled: true
+  replicas: 0
   image: mcr.microsoft.com/mssql/server:2025-CU7-ubuntu-22.04
   storage: 10Gi
   resources:
