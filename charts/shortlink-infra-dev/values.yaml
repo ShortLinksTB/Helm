@@ -12,7 +12,7 @@ dbgate:
       memory: 512Mi
 
 mssql:
-  image: mcr.microsoft.com/mssql/server:2022-CU18-ubuntu-22.04
+  image: mcr.microsoft.com/mssql/server:2022-CU27-GDR2-ubuntu-22.04
   storage: 10Gi
   resources:
     requests:
