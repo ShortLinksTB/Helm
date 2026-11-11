@@ -16,6 +16,6 @@ ingress:
   pathType: Prefix
 
 runtimeConfig:
-  keycloakUrl: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
-  keycloakRealm: shortlink
-  keycloakClientId: compareshop-public-ui
+  authApiUrl: https://auth-compareshop-dev.giamha.online
+  turnstileEnabled: false
+  turnstileSiteKey: ""

@@ -8,7 +8,7 @@ metadata:
 data:
   config.js: |
     window.__APP_CONFIG__ = {
-      KEYCLOAK_URL: {{ .Values.runtimeConfig.keycloakUrl | quote }},
-      KEYCLOAK_REALM: {{ .Values.runtimeConfig.keycloakRealm | quote }},
-      KEYCLOAK_CLIENT_ID: {{ .Values.runtimeConfig.keycloakClientId | quote }}
+      AUTH_API_URL: {{ .Values.runtimeConfig.authApiUrl | quote }},
+      TURNSTILE_ENABLED: {{ .Values.runtimeConfig.turnstileEnabled }},
+      TURNSTILE_SITE_KEY: {{ .Values.runtimeConfig.turnstileSiteKey | quote }}
     };

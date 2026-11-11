@@ -20,9 +20,9 @@ ingress:
   pathType: Prefix
 
 runtimeConfig:
-  keycloakUrl: ""
-  keycloakRealm: ""
-  keycloakClientId: ""
+  authApiUrl: ""
+  turnstileEnabled: false
+  turnstileSiteKey: ""
 
 resources:
   requests:
