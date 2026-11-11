@@ -25,6 +25,9 @@ emailSending:
   mode: Mock
   sendReal: false
 
+compareShopUI:
+  baseUrl: ""
+
 outbox:
   enabled: false
   serviceKey:

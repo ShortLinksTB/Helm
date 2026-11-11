@@ -28,6 +28,8 @@ spec:
               value: {{ .Values.emailSending.sendReal | quote }}
             - name: EmailSending__Mode
               value: {{ .Values.emailSending.mode | quote }}
+            - name: CompareShopUI__BaseUrl
+              value: {{ required "compareShopUI.baseUrl is required" .Values.compareShopUI.baseUrl | quote }}
             {{- if .Values.outbox.enabled }}
             - name: EmailOutbox__ServiceKey
               valueFrom:
