@@ -40,7 +40,7 @@ spec:
               value: {{ .Values.env.aspnetEnvironment | quote }}
             - name: DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE
               value: "false"
-            - name: ConnectionStrings__CompareShopAuth
+            - name: ConnectionStrings__Auth
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secretName | quote }}
