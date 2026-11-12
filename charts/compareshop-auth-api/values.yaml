@@ -37,6 +37,10 @@ throttle:
   secretName: compareshop-auth-api-runtime
   hashKey: throttle-hash-key
 
+pin:
+  secretName: compareshop-auth-api-pin
+  pepperKey: pepper
+
 env:
   aspnetEnvironment: Production
   issuer: https://auth-compareshop-dev.giamha.online
