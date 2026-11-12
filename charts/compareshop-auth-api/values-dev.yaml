@@ -34,6 +34,12 @@ throttle:
   secretName: compareshop-auth-api-runtime
   hashKey: throttle-hash-key
 
+rabbitmq:
+  host: rabbitmq.shortlink-infra-dev.svc.cluster.local
+  secretName: compareshop-auth-api-publisher
+  usernameKey: username
+  passwordKey: password
+
 env:
   aspnetEnvironment: Development
   issuer: https://auth-compareshop-dev.giamha.online
