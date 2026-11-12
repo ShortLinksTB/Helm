@@ -33,6 +33,10 @@ outbox:
   secretName: compareshop-auth-api-runtime
   encryptionKey: email-outbox-encryption-key
 
+throttle:
+  secretName: compareshop-auth-api-runtime
+  hashKey: throttle-hash-key
+
 env:
   aspnetEnvironment: Production
   issuer: https://auth-compareshop-dev.giamha.online
