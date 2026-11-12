@@ -67,6 +67,18 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.throttle.secretName | quote }}
                   key: {{ .Values.throttle.hashKey | quote }}
+            - name: RabbitMQ__Host
+              value: {{ .Values.rabbitmq.host | quote }}
+            - name: RabbitMQ__Username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rabbitmq.secretName | quote }}
+                  key: {{ .Values.rabbitmq.usernameKey | quote }}
+            - name: RabbitMQ__Password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rabbitmq.secretName | quote }}
+                  key: {{ .Values.rabbitmq.passwordKey | quote }}
             - name: OpenTelemetry__ServiceName
               value: compareshop-auth-api
             - name: OpenTelemetry__OtlpEndpoint
