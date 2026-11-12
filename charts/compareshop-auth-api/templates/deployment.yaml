@@ -57,7 +57,7 @@ spec:
               value: {{ .Values.env.keyId | quote }}
             - name: Jwt__PrivateKeyPath
               value: {{ printf "%s/%s" .Values.signing.mountPath .Values.signing.privateKeyKey | quote }}
-            - name: AuthEmailOutbox__EncryptionKey
+            - name: Outbox__EncryptionKey
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.outbox.secretName | quote }}
