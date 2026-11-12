@@ -67,6 +67,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.throttle.secretName | quote }}
                   key: {{ .Values.throttle.hashKey | quote }}
+            - name: Pin__Pepper
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.pin.secretName | quote }}
+                  key: {{ .Values.pin.pepperKey | quote }}
             - name: RabbitMQ__Host
               value: {{ .Values.rabbitmq.host | quote }}
             - name: RabbitMQ__Username
