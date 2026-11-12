@@ -62,6 +62,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.outbox.secretName | quote }}
                   key: {{ .Values.outbox.encryptionKey | quote }}
+            - name: Throttle__HashKey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.throttle.secretName | quote }}
+                  key: {{ .Values.throttle.hashKey | quote }}
             - name: OpenTelemetry__ServiceName
               value: compareshop-auth-api
             - name: OpenTelemetry__OtlpEndpoint
