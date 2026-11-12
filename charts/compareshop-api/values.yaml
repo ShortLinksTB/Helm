@@ -28,6 +28,9 @@ env:
   aspnetEnvironment: Production
   keycloakAuthority: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
   keycloakAudience: compareshop-admin-ui
+  authApiAuthority: ""
+  authApiIssuer: ""
+  authApiAudience: ""
   minioEndpoint: http://minio.shortlink-infra-dev.svc.cluster.local:9000
   minioBucket: compareshop-files
   minioUseSsl: false

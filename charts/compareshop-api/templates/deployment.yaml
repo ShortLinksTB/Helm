@@ -55,6 +55,18 @@ spec:
               value: {{ .Values.env.keycloakAuthority | quote }}
             - name: Keycloak__Audience
               value: {{ .Values.env.keycloakAudience | quote }}
+            {{- with .Values.env.authApiAuthority }}
+            - name: AuthAPI__Authority
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.env.authApiIssuer }}
+            - name: AuthAPI__Issuer
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.env.authApiAudience }}
+            - name: AuthAPI__Audience
+              value: {{ . | quote }}
+            {{- end }}
             - name: Minio__Endpoint
               value: {{ .Values.env.minioEndpoint | quote }}
             - name: Minio__Bucket
