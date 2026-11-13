@@ -1,7 +1,7 @@
 replicaCount: 1
 environment: Development
 image:
-  tag: ddace6af6c215afeddbd5d7a0791943bd908cd01
+  tag: f60380e6d4d7ea05f3914fe17e4e92061793b594
   pullPolicy: Always
 emailSending:
   mode: Mock
