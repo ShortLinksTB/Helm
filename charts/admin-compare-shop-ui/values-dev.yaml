@@ -1,5 +1,5 @@
 image:
-  tag: "97f98b231b0f41df80fd81b7564787d178a53c60"
+  tag: "58eac34f528db769e4b74c3aaa7e7fe087c54979"
 
 ingress:
   enabled: true
