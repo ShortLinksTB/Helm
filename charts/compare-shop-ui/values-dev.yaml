@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/shortlinkstb/compare-shop-ui
-  tag: "92dd3849a22f7105205993b0e97ee749037b8559"
+  tag: "628c5f1c5d78214f2c663fbfa3082d04c5cfca8f"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -16,6 +16,6 @@ ingress:
   pathType: Prefix
 
 runtimeConfig:
-  authApiUrl: https://auth-compareshop-dev.giamha.online
-  turnstileEnabled: false
-  turnstileSiteKey: ""
+  keycloakUrl: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
+  keycloakRealm: shortlink
+  keycloakClientId: compareshop-public-ui

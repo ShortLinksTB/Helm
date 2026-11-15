@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/shortlinkstb/compareshop-api
-  tag: 5dc893e0bc57d0e28403c239051f1dec4cac020b
+  tag: 03825b8dd091aef41f244da74ddef07e0911d7c0
   pullPolicy: IfNotPresent
 
 service:
@@ -25,11 +25,6 @@ env:
   aspnetEnvironment: Production
   keycloakAuthority: https://keycloak-shortlink-dev.giamha.online/realms/shortlink
   keycloakAudience: compareshop-admin-ui
-  authApiAuthority: https://auth-compareshop-dev.giamha.online
-  authApiIssuer: https://auth-compareshop-dev.giamha.online
-  authApiAudience: compareshop-api
-  minioPublicEndpoint: minio-s3-shortlink-dev.giamha.online
-  minioPublicUseSsl: true
   bootstrapSuperAdminSubjects:
     - 5577d25e-4cec-4d2e-9faf-da3338dcd515
   corsOrigins:
@@ -52,4 +47,4 @@ workers:
     - name: Logging__LogLevel__CompareShopAPI.Workers.Ingestion.BhxPlaywrightCatalogReader
       value: Debug
   image:
-    tag: 5dc893e0bc57d0e28403c239051f1dec4cac020b
+    tag: 03825b8dd091aef41f244da74ddef07e0911d7c0
