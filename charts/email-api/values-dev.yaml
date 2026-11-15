@@ -1,6 +1,14 @@
 replicaCount: 1
+environment: Development
 image:
-  tag: b50a67f422849a36dd487ca43f5f3c8b59377037
+  tag: f60380e6d4d7ea05f3914fe17e4e92061793b594
   pullPolicy: Always
 emailSending:
+  mode: Mock
   sendReal: false
+compareShopUI:
+  baseUrl: https://compareshop-dev.giamha.online
+outbox:
+  enabled: true
+qcRunner:
+  enabled: true

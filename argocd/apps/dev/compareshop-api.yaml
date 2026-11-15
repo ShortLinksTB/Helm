@@ -21,3 +21,11 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: compareshop-files-app-credentials
+      namespace: compareshop-dev
+      jsonPointers:
+        - /data

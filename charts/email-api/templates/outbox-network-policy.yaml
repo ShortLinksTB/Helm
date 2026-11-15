@@ -1,0 +1,23 @@
+{{- if .Values.outbox.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "email-api.fullname" . }}-outbox
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "email-api.name" . }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.outbox.networkPolicy.readerNamespace | quote }}
+          podSelector:
+            matchLabels:
+              {{ .Values.outbox.networkPolicy.readerPodLabel.key }}: {{ .Values.outbox.networkPolicy.readerPodLabel.value | quote }}
+      ports:
+        - protocol: TCP
+          port: 8080
+{{- end }}

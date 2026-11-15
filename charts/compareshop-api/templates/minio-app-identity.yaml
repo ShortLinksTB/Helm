@@ -1,0 +1,248 @@
+{{- $name := include "compareshop-api.fullname" . -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}-minio-provisioner
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}-minio-provisioner
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["{{ .Values.env.minioAppCredentialsSecretName }}"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}-minio-provisioner
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}-minio-provisioner
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}-minio-provisioner
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.env.minioAppCredentialsSecretName }}
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+type: Opaque
+data: {}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}-minio-app-identity
+  labels:
+    {{- include "compareshop-api.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "compareshop-api.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $name }}-minio-provisioner
+      automountServiceAccountToken: true
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: install-minio-sdk
+          image: python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+          imagePullPolicy: IfNotPresent
+          command:
+            - python
+            - -m
+            - pip
+            - install
+            - --disable-pip-version-check
+            - --no-cache-dir
+            - --target=/sdk
+            - minio==7.2.20
+          volumeMounts:
+            - name: sdk
+              mountPath: /sdk
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: provision-identity
+          image: python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-c"]
+          args:
+            - |
+              import base64
+              import json
+              import os
+              import secrets
+              import ssl
+              import sys
+              from urllib.request import Request, urlopen
+
+              try:
+                  from minio import MinioAdmin
+                  from minio.credentials import StaticProvider
+              except Exception:
+                  print("MinIO SDK unavailable; details redacted.", file=sys.stderr)
+                  raise SystemExit(1)
+
+              APP_ACCESS_KEY = os.environ["APP_ACCESS_KEY"]
+              APP_SECRET_NAME = os.environ["APP_SECRET_NAME"]
+              POLICY_NAME = "compareshop-files-app"
+              POLICY = {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Action": ["s3:ListBucket"],
+                          "Resource": ["arn:aws:s3:::compareshop-files"],
+                      },
+                      {
+                          "Effect": "Allow",
+                          "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+                          "Resource": ["arn:aws:s3:::compareshop-files/*"],
+                      },
+                  ],
+              }
+
+              def kubernetes_request(method, payload=None):
+                  token_path = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                  ca_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                  namespace_path = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+                  with open(token_path, encoding="utf-8") as token_file:
+                      token = token_file.read().strip()
+                  with open(namespace_path, encoding="utf-8") as namespace_file:
+                      namespace = namespace_file.read().strip()
+                  host = os.environ["KUBERNETES_SERVICE_HOST"]
+                  port = os.environ["KUBERNETES_SERVICE_PORT_HTTPS"]
+                  url = (
+                      f"https://{host}:{port}/api/v1/namespaces/{namespace}"
+                      f"/secrets/{APP_SECRET_NAME}"
+                  )
+                  headers = {"Authorization": f"Bearer {token}"}
+                  data = None
+                  if payload is not None:
+                      headers["Content-Type"] = "application/merge-patch+json"
+                      data = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+                  request = Request(url, data=data, headers=headers, method=method)
+                  context = ssl.create_default_context(cafile=ca_path)
+                  with urlopen(request, context=context, timeout=15) as response:
+                      return json.loads(response.read())
+
+              def main():
+                  secret_object = kubernetes_request("GET")
+                  encoded = secret_object.get("data") or {}
+                  access_key = base64.b64decode(encoded.get("access-key", "")).decode("utf-8")
+                  app_secret_key = base64.b64decode(encoded.get("secret-key", "")).decode("utf-8")
+                  if bool(access_key) != bool(app_secret_key):
+                      raise RuntimeError("app Secret has only one credential key")
+                  if access_key and access_key != APP_ACCESS_KEY:
+                      raise RuntimeError("app Secret access key does not match the fixed identity")
+                  if not access_key:
+                      app_secret_key = secrets.token_hex(20)
+
+                  endpoint = os.environ["MINIO_ENDPOINT"]
+                  secure = endpoint.startswith("https://")
+                  endpoint = endpoint.removeprefix("https://").removeprefix("http://")
+                  admin = MinioAdmin(
+                      endpoint=endpoint,
+                      credentials=StaticProvider(
+                          os.environ["MINIO_ROOT_USER"],
+                          os.environ["MINIO_ROOT_PASSWORD"],
+                      ),
+                      secure=secure,
+                  )
+                  admin.policy_add(POLICY_NAME, policy=POLICY)
+                  admin.user_add(APP_ACCESS_KEY, app_secret_key)
+                  admin.policy_set(POLICY_NAME, user=APP_ACCESS_KEY)
+
+                  if not access_key:
+                      kubernetes_request(
+                          "PATCH",
+                          {
+                              "data": {
+                                  "access-key": base64.b64encode(APP_ACCESS_KEY.encode()).decode(),
+                                  "secret-key": base64.b64encode(app_secret_key.encode()).decode(),
+                              }
+                          },
+                      )
+                  print("Dedicated MinIO identity reconciled; credential values suppressed.")
+
+              try:
+                  main()
+              except Exception:
+                  print("Provisioning failed; sensitive details redacted.", file=sys.stderr)
+                  raise SystemExit(1)
+          env:
+            - name: PYTHONPATH
+              value: /sdk
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: APP_ACCESS_KEY
+              value: "compareshop-files"
+            - name: APP_SECRET_NAME
+              value: {{ .Values.env.minioAppCredentialsSecretName | quote }}
+            - name: MINIO_ENDPOINT
+              value: {{ .Values.env.minioEndpoint | quote }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAdminCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioAccessKeySecretKey | quote }}
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.minioAdminCredentialsSecretName | quote }}
+                  key: {{ .Values.env.minioSecretKeySecretKey | quote }}
+          volumeMounts:
+            - name: sdk
+              mountPath: /sdk
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: sdk
+          emptyDir: {}
+        - name: tmp
+          emptyDir:
+            sizeLimit: 32Mi

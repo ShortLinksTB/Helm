@@ -1,0 +1,63 @@
+{{- if .Values.qcRunner.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "email-api.fullname" . }}-outbox-reader
+  labels:
+    app.kubernetes.io/name: email-api-outbox-reader
+    app.kubernetes.io/part-of: email-api-qc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: email-api-outbox-reader
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: email-api-outbox-reader
+        app.kubernetes.io/part-of: email-api-qc
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: qc-runner
+          image: {{ .Values.qcRunner.image | quote }}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c", "while true; do sleep 3600; done"]
+          env:
+            - name: EMAIL_API_BASE_URL
+              value: {{ printf "http://%s:%v" (include "email-api.fullname" .) .Values.service.port | quote }}
+            - name: EMAIL_OUTBOX_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.qcRunner.outboxServiceKey.secretName | quote }}
+                  key: {{ .Values.qcRunner.outboxServiceKey.secretKey | quote }}
+            - name: EMAIL_OUTBOX_SERVICE_KEY_HEADER
+              value: {{ .Values.qcRunner.outboxServiceKey.header | quote }}
+            - name: RABBITMQ_HOST
+              value: {{ .Values.qcRunner.rabbitMq.host | quote }}
+            - name: RABBITMQ_PORT
+              value: {{ .Values.qcRunner.rabbitMq.port | quote }}
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.qcRunner.publisherSecret.name | quote }}
+                  key: {{ .Values.qcRunner.publisherSecret.usernameKey | quote }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.qcRunner.publisherSecret.name | quote }}
+                  key: {{ .Values.qcRunner.publisherSecret.passwordKey | quote }}
+          resources:
+            {{- toYaml .Values.qcRunner.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+{{- end }}
