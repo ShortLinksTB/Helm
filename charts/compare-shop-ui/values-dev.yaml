@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/shortlinkstb/compare-shop-ui
-  tag: "4ba5e604c80c53dd921701063db0ea3780fe320f"
+  tag: "c57c3f7dd600c9a7da7754a565d3dcad494aedba"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -12,6 +12,8 @@ ingress:
   enabled: true
   className: nginx
   host: compareshop-dev.giamha.online
+  additionalHosts:
+    - compare-shop-ui.dev.multica.ai
   path: /
   pathType: Prefix
 
