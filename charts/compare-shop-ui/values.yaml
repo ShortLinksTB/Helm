@@ -16,6 +16,7 @@ ingress:
   enabled: false
   className: nginx
   host: ""
+  additionalHosts: []
   path: /
   pathType: Prefix
 
