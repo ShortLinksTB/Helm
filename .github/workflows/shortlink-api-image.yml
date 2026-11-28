@@ -19,7 +19,8 @@ jobs:
       - name: Update dev image tag
         env:
           TAG: ${{ github.event.client_payload.tag }}
-        run: sed -i -E "s/^  tag: .*/  tag: ${TAG}/" charts/shortlink-api/values-dev.yaml
+        run: |
+          sed -i -E "s/^  tag: .*/  tag: ${TAG}/" charts/shortlink-api/values-dev.yaml
 
       - name: Commit image update
         env:
